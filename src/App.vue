@@ -1,17 +1,17 @@
 <template>
   <div id="app">
-    <img alt="Vue logo" src="./assets/logo.png">
-    <HelloWorld msg="Welcome to Your Vue.js App"/>
+    <MidiOut msg="Welcome to Your Vue.js App"/>
   </div>
 </template>
 
 <script>
-import HelloWorld from './components/HelloWorld.vue'
+import MidiOut from './components/MidiOut.vue'
+import MidiIn from './components/MidiIn.vue'
 
 export default {
   name: 'app',
   components: {
-    HelloWorld
+    MidiOut
   }
 }
 </script>
