@@ -1,17 +1,50 @@
 <template>
   <div id="app">
-    <MidiOut msg="Welcome to Your Vue.js App"/>
+    <midiOut msg="Welcome to Your Vue.js App"/>
+    <midiIn/>
+
+    <midiFile file="beethoven_fur_elise.mid" @update='updateMidi'></midiFile>
+
+    <pianoRoll :track="track"></pianoRoll>
+    <!-- <synth :track="track"></synth> -->
+
   </div>
 </template>
 
 <script>
-import MidiOut from './components/MidiOut.vue'
-import MidiIn from './components/MidiIn.vue'
+import midiOut from './components/midiOut.vue'
+import midiIn from './components/midiIn.vue'
+import pianoRoll from './components/pianoRoll.vue'
+import midiFile from './components/midiFile.vue'
+import synth from './components/synth.vue'
 
 export default {
+
   name: 'app',
+  data: function () {
+    return {
+      track: {},
+      midi: {}
+    }
+  },
+  methods: {
+    updateMidi: function (midi) {
+      console.log('at app level')
+      this.midi = midi
+
+      this.track = midi.tracks[0]
+
+      // vm.notes = track.notes
+
+      // vm.durationTicks = track.durationTicks
+    }
+  },
   components: {
-    MidiOut
+    midiFile,
+    midiOut,
+    synth,
+    midiIn,
+    pianoRoll
   }
 }
 </script>
