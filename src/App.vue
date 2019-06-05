@@ -1,12 +1,13 @@
 <template>
   <div id="app">
-    <midiOut msg="Welcome to Your Vue.js App"/>
+
+    <midiOut/>
     <midiIn/>
 
-    <midiFile file="beethoven_fur_elise.mid" @update='updateMidi'></midiFile>
+    <midiFile file="deb_pass.mid" @update='updateMidi'></midiFile>
 
-    <pianoRoll :track="track"></pianoRoll>
-    <!-- <synth :track="track"></synth> -->
+    <div class="pianoRoll"><pianoRoll :track="track"></pianoRoll></div>
+    <div class="synth"><synth :track="track"></synth></div>
 
   </div>
 </template>
@@ -17,6 +18,8 @@ import midiIn from './components/midiIn.vue'
 import pianoRoll from './components/pianoRoll.vue'
 import midiFile from './components/midiFile.vue'
 import synth from './components/synth.vue'
+
+import VueGridLayout from 'vue-grid-layout'
 
 export default {
 
@@ -57,5 +60,13 @@ export default {
   text-align: center;
   color: #2c3e50;
   margin-top: 60px;
+}
+
+.pianoRoll {
+
+  width:100%;
+  height:300px;
+  position:relative;
+
 }
 </style>

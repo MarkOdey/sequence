@@ -1,7 +1,7 @@
 <template >
     <div draggable="true" @dragstart="dragstart" @dragend="dragend" class="note"
     :style="{
-        top:midi*keyHeight+'px',
+        bottom:midi*keyHeight+'px',
         left:ticks*tickWidth+'px',
         width:durationTicks*tickWidth +'px',
         height: keyHeight + 'px'
@@ -28,7 +28,7 @@ export default {
       var x = event.clientX - bounds.left
       var y = event.clientY - bounds.top
       var ticks = x / this.tickWidth
-      var midi = y / this.keyHeight
+      var midi = Math.floor((bounds.height - y) / this.keyHeight)
       console.log(this)
       this.$emit('update', { index: this.index, midi: midi, ticks: ticks })
       console.log(event)

@@ -1,17 +1,32 @@
 <template>
-    <div></div>
+    <div>
+      <knob-control min="0" max="60" stepSize="0.1"  v-model="attack"></knob-control>
+
+    </div>
 </template>
 
 <script>
 import Tone from 'tone'
+import KnobControl from 'vue-knob-control'
 
 export default {
   watch: {
+
+    attack: {
+
+      handler: function (val) {
+        console.log(this.attack + 'changed')
+
+        for (var i in this.polySynth.voices) {
+          this.polySynth.voices[i].envelope.attack = val
+        }
+      }
+
+    },
     track: {
 
       handler: function (val) {
         var vm = this
-
         console.log(val)
         console.log('registering notest')
         console.log(this.track)
@@ -21,7 +36,8 @@ export default {
           notes[i] = {
             time: note.ticks + 'i',
             midi: note.midi,
-            durationTicks: note.durationTicks
+            durationTicks: note.durationTicks,
+            velocity: note.velocity
 
           }
         }
@@ -30,7 +46,8 @@ export default {
           var pitch = Tone.Frequency(note.midi, 'midi').toNote()
           // the notes given as the second element in the array
           // will be passed in as the second argument
-          vm.synth.triggerAttackRelease(pitch, note.durationTicks + 'i', time, note.velocity)
+
+          vm.polySynth.triggerAttackRelease(pitch, note.durationTicks + 'i', time, note.velocity)
         }, notes)
 
         part.loopStart = 0
@@ -38,29 +55,32 @@ export default {
         part.loop = true
 
         part.start(0)
-
-        /* for (var i in this.track.notes) {
-          var note = this.track.notes[i]
-          Tone.Transport.scheduleRepeat(function (time) {
-            var pitch = Tone.Frequency(note.midi, 'midi').toNote()
-          }, note.ticks + 'i')
-        } */
       },
       deep: true
     }
 
   },
   beforeMount: function () {
-    this.synth.toMaster()
+    this.polySynth.toMaster()
   },
   data: function () {
+    var synth = Tone.Synth
+    var polySynth = new Tone.PolySynth(6, synth)
+
+    console.log(polySynth.voices)
     return {
       data: {},
-      synth: new Tone.PolySynth(6, Tone.Synth)
+      attack: 0,
+      release: 0,
+      polySynth: polySynth
+
     }
   },
   props: {
     track: Object
+  },
+  components: {
+    KnobControl
   }
 
 }

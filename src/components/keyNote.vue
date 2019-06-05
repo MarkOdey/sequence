@@ -1,6 +1,6 @@
 <template>
     <div :style="{
-        top: keyHeight*value + 'px',
+        bottom: keyHeight*value + 'px',
         height: keyHeight + 'px'
 
         }"
@@ -15,6 +15,7 @@
 import Tone from 'tone'
 
 export default {
+
   name: 'keyNote',
   data: function () {
     return {
@@ -53,7 +54,7 @@ export default {
     left:0px;
     width:100%;
 
-    border-bottom:1px solid rgba(0,0,0,0.1);
+    border:1px solid rgba(0,0,0,0.1);
 
   }
 
