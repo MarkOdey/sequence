@@ -1,32 +1,27 @@
 <template>
   <div id="app">
-
-    <midiOut/>
-    <midiIn/>
-
-    <midiFile file="deb_pass.mid" @update='updateMidi'></midiFile>
-
-    <div class="pianoRoll"><pianoRoll :track="track"></pianoRoll></div>
-    <div class="synth"><synth :track="track"></synth></div>
+    <midiFile file="beat.mid" @update='updateMidi'></midiFile>
+    <div v-for="track in tracks" :key="track.id">
+      <channel :track="track"></channel>
+    </div>
 
   </div>
 </template>
 
 <script>
-import midiOut from './components/midiOut.vue'
-import midiIn from './components/midiIn.vue'
-import pianoRoll from './components/pianoRoll.vue'
+import channel from './components/channel.vue'
 import midiFile from './components/midiFile.vue'
-import synth from './components/synth.vue'
 
-import VueGridLayout from 'vue-grid-layout'
+import Tone from 'tone'
+
+// import VueGridLayout from 'vue-grid-layout'
 
 export default {
 
   name: 'app',
   data: function () {
     return {
-      track: {},
+      tracks: [],
       midi: {}
     }
   },
@@ -35,19 +30,21 @@ export default {
       console.log('at app level')
       this.midi = midi
 
-      this.track = midi.tracks[0]
+      this.tracks = midi.tracks
 
-      // vm.notes = track.notes
+      Tone.Transport.loopStart = 0
+      Tone.Transport.loopEnd = midi.durationTicks + 'i'
+      Tone.Transport.loop = true
+
+      console.log(midi)
 
       // vm.durationTicks = track.durationTicks
     }
+
   },
   components: {
-    midiFile,
-    midiOut,
-    synth,
-    midiIn,
-    pianoRoll
+    channel,
+    midiFile
   }
 }
 </script>

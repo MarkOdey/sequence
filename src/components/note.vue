@@ -1,14 +1,14 @@
 <template >
     <div draggable="true" @dragstart="dragstart" @dragend="dragend" class="note"
     :style="{
-        bottom:midi*keyHeight+'px',
-        left:ticks*tickWidth+'px',
-        width:durationTicks*tickWidth +'px',
+        bottom:data.midi*keyHeight+'px',
+        left:data.ticks*tickWidth+'px',
+        width:data.durationTicks*tickWidth +'px',
         height: keyHeight + 'px'
 
     }"
 
-    >{{midi | toNote}}</div>
+    >{{data.midi | toNote}}</div>
 </template>
 
 <script>
@@ -27,12 +27,12 @@ export default {
       var bounds = parent.getBoundingClientRect()
       var x = event.clientX - bounds.left
       var y = event.clientY - bounds.top
-      var ticks = x / this.tickWidth
+      var ticks = Math.round(x / this.tickWidth)
       var midi = Math.floor((bounds.height - y) / this.keyHeight)
       console.log(this)
-      this.$emit('update', { index: this.index, midi: midi, ticks: ticks })
-      console.log(event)
-      console.log('drag end')
+
+      this.data.update({ midi: midi, ticks: ticks })
+      // this.$emit('update', { index: this.index, midi: midi, ticks: ticks })
     }
   },
   filters: {
@@ -47,12 +47,9 @@ export default {
     }
   },
   props: {
-    index: String,
-    midi: Number,
-    ticks: Number,
-    durationTicks: Number,
-    tickWidth: Number,
-    keyHeight: Number
+    data: Object,
+    keyHeight: Number,
+    tickWidth: Number
   }
 
 }

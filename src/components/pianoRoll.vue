@@ -1,5 +1,6 @@
 <style>
-  .container {
+
+  .pianoContainer {
 
     position:absolute;
     left:0;
@@ -15,6 +16,10 @@
     height:100%;
     top:0px;
     left:0px;
+  }
+
+  .noteGridContainer {
+    position: absolute;
   }
 
   .grid {
@@ -53,61 +58,73 @@
 
 <template>
 
-  <div ref="container" class="container">
-
-    <div ref="keyNoteBar"
-        :style="{
-          width: keyWidth + 'px',
-          height: keyHeight*keyNotes.length+'px',
-
-          }" class="keyNoteBar">
-      <keyNote
-        v-for="keyNote in keyNotes"
-        :key="keyNote.value"
-        :value="keyNote.value"
-        :keyHeight="keyHeight"
-
-      ></keyNote>
+  <div class="row pianoRoll">
+    <div class="col-1">
+      <font-awesome-icon @click="play()" icon="play" />
+      <font-awesome-icon @click="pause()" icon="pause" />
+      <font-awesome-icon icon="circle" />
 
     </div>
 
-    <div :style="{
-      height: keyHeight*keyNotes.length+'px',
-       }" class="noteGridContainer">
-      <div :style="{
-          height: keyHeight*keyNotes.length+'px',
-          width:(tickWidth*track.durationTicks +keyWidth)+'px',
-          left: keyWidth +'px'
+    <div class="col ">
+      <div  ref="pianoContainer" class="pianoContainer">
 
-        }"
-        class="noteGrid">
+        <div ref="keyNoteBar"
+            :style="{
+              width: keyWidth + 'px',
+              height: keyHeight*keyNotes.length+'px',
+            }" class="keyNoteBar">
 
-        <div class="grid"
-          :style="{
-              background : 'repeating-linear-gradient( to right, #EEE, #EEE '+tickWidth*rate+'px, #DDD '+tickWidth*rate+'px, #DDD '+tickWidth*rate*2+'px'
+          <keyNote
+            v-for="keyNote in keyNotes"
+            :key="keyNote.value"
+            :value="keyNote.value"
+            :keyHeight="keyHeight"
 
-          }">
+          ></keyNote>
 
         </div>
 
-        <div class="cursor"
-        :style="{
-          left:cursor.ticks*tickWidth+'px'
-        }"></div>
+        <div :style="{
+          height: keyHeight*keyNotes.length+'px',
+          left: keyWidth +'px'
+          }" class="noteGridContainer">
+          <div :style="{
+              height: keyHeight*keyNotes.length+'px',
+              width:(tickWidth*channel.track.durationTicks +keyWidth)+'px'
 
-        <note class="note"
-          v-for="note in track.notes"
-          :index="note.index"
-          :key="note.index"
-          :midi="note.midi"
-          :ticks="note.ticks"
-          :durationTicks="note.durationTicks"
-          :tickWidth="tickWidth"
-          :keyHeight="keyHeight"
-          @update="noteUpdated"
-        >{{note.i}}</note>
+            }"
+
+            class="noteGrid">
+
+            <div class="grid"
+              :style="{
+                  background : 'repeating-linear-gradient( to right, #EEE, #EEE '+tickWidth*rate+'px, #DDD '+tickWidth*rate+'px, #DDD '+tickWidth*rate*2+'px'
+
+              }">
+
+            </div>
+
+            <div class="cursor"
+            :style="{
+              left:cursor.ticks*tickWidth+'px'
+            }"></div>
+
+            <note class="note"
+              v-for="note in channel.track.notes"
+              :index="note.index"
+              :key="note.index"
+              :data="note"
+              :tickWidth="tickWidth"
+              :keyHeight="keyHeight"
+              @update="noteUpdated"
+            >{{note.i}}</note>
+
+          </div>
+        </div>
 
       </div>
+
     </div>
   </div>
 </template>
@@ -141,14 +158,8 @@ export default {
   beforeMount: function () {
     var vm = this
 
-    console.log(vm)
-
-    for (var i in vm.track.notes) {
-      vm.track.notes[i].index = i
-    }
-
     function animate () {
-      vm.cursor.ticks = Tone.Transport.ticks % vm.track.durationTicks
+      vm.cursor.ticks = Tone.Transport.ticks % vm.channel.track.durationTicks
 
       window.setTimeout(function () {
         window.requestAnimationFrame(animate)
@@ -156,24 +167,21 @@ export default {
     }
 
     window.requestAnimationFrame(animate)
-    Tone.Transport.bpm.value = 400
-    Tone.Transport.start('+0.1')
+
+    console.log(this.channel.track)
+
+    this.channel.track.on('updated', function (track) {
+      console.log(track)
+    })
   },
 
   mounted: function () {
     this.id = this._uid
-
-    this.$refs.container.addEventListener('scroll', this.handleScroll)
+    this.$refs.pianoContainer.addEventListener('scroll', this.handleScroll)
   },
 
   watch: {
 
-    track: function (track) {
-      console.log('Track is updated.')
-      for (var i in track.notes) {
-        track.notes[i].index = i
-      }
-    },
     keyHeight (val) {
       console.log('key Height changed')
       console.log(val)
@@ -181,21 +189,26 @@ export default {
 
   },
   methods: {
+    play: function (e) {
+      console.log('starting')
+      this.channel.play()
+    },
+    pause: function (e) {
+      this.channel.pause()
+    },
     handleScroll: function (e) {
-      console.log(e.target.scrollLeft)
-
-      console.log(this.$refs.keyNoteBar)
+      // console.log(e.target.scrollLeft)
+      // console.log(this.$refs.keyNoteBar)
 
       var dom = this.$refs.keyNoteBar
 
       dom.style.left = e.target.scrollLeft + 'px'
     },
-    noteUpdated: function (event) {
-      console.log(event)
-      console.log(this.track.notes)
-      for (var i in event) {
-        this.track.notes[Number(event.index)][i] = event[i]
-      }
+    noteUpdated: function (payload) {
+      console.log(payload)
+      console.log(this.channel.track)
+
+      // this.channel.track.updateNote(payload)
     }
   },
 
@@ -219,7 +232,7 @@ export default {
     }
   },
   props: {
-    track: Object
+    channel: Object
   },
   components: {
     note,

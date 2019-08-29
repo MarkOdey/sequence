@@ -1,6 +1,7 @@
 <template>
     <div>
-      <knob-control min="0" max="60" stepSize="0.1"  v-model="attack"></knob-control>
+
+      <knob-control :min=0 :max=51 :stepSize=0.1  v-model="attack"></knob-control>
 
     </div>
 </template>
@@ -23,51 +24,84 @@ export default {
       }
 
     },
-    track: {
+    channel: {
 
-      handler: function (val) {
-        var vm = this
-        console.log(val)
-        console.log('registering notest')
-        console.log(this.track)
-        var notes = []
-        for (var i in this.track.notes) {
-          var note = this.track.notes[i]
-          notes[i] = {
-            time: note.ticks + 'i',
-            midi: note.midi,
-            durationTicks: note.durationTicks,
-            velocity: note.velocity
+      handler: function (payload) {
+        console.log(payload)
 
-          }
+        if (payload.track !== undefined) {
+          self.updateTrack(payload.track)
         }
-
-        var part = new Tone.Part(function (time, note) {
-          var pitch = Tone.Frequency(note.midi, 'midi').toNote()
-          // the notes given as the second element in the array
-          // will be passed in as the second argument
-
-          vm.polySynth.triggerAttackRelease(pitch, note.durationTicks + 'i', time, note.velocity)
-        }, notes)
-
-        part.loopStart = 0
-        part.loopEnd = this.track.durationTicks + 'i'
-        part.loop = true
-
-        part.start(0)
-      },
-      deep: true
+      }
     }
 
   },
-  beforeMount: function () {
-    this.polySynth.toMaster()
+  methods: {
+
+    updateTrack: function (track) {
+      var self = this
+
+      console.log(track)
+
+      // console.log(this.channel.track)
+      for (var i in track.notes) {
+        var note = track.notes[i]
+
+        note.on('noteOn', function (payload) {
+          console.log('note on!!!')
+          console.log(payload)
+          // Converting midi note to pitch.
+          var pitch = Tone.Frequency(payload.midi, 'midi').toNote()
+          // the notes given as the second element in the array
+          // will be passed in as the second argument
+          self.polySynth.triggerAttackRelease(pitch, payload.durationTicks + 'i')
+        })
+
+        note.on('noteOff', function (payload) {
+          console.log('note off!!')
+          console.log(payload)
+          // Converting midi note to pitch.
+          var pitch = Tone.Frequency(payload.midi, 'midi').toNote()
+          // self.polySynth.triggerRelease(pitch)
+        })
+      }
+
+      track.on('noteUpdated', function (payload) {
+        console.log('note updated')
+        console.log(payload)
+      })
+    }
   },
+
+  beforeMount: function () {
+    var self = this
+
+    self.notes = []
+
+    console.log(this.channel)
+
+    this.channel.on('play', function () {
+      // self.part.start()
+    })
+    this.channel.on('pause', function () {
+      // self.part.stop()
+    })
+
+    if (this.channel.track !== undefined) {
+      this.updateTrack(this.channel.track)
+
+      this.channel.track.on('updated', self.updateTrack)
+    }
+  },
+
   data: function () {
     var synth = Tone.Synth
+
     var polySynth = new Tone.PolySynth(6, synth)
 
-    console.log(polySynth.voices)
+    polySynth.volume.value = -20
+    polySynth.connect(self.channel.audio)
+
     return {
       data: {},
       attack: 0,
@@ -77,7 +111,7 @@ export default {
     }
   },
   props: {
-    track: Object
+    channel: Object
   },
   components: {
     KnobControl

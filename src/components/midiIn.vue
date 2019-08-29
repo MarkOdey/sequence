@@ -1,37 +1,32 @@
 <template>
+<div>
+  <div v-for="input in inputs" :key="input.id">
 
-<h1>
-    this is a test.
-</h1>
+  </div>
+
+</div>
 </template>
 
 <script>
 import WebMidi from 'webmidi'
-
-console.log('this is a tsete', document)
-
-WebMidi.enable(function (err) {
-  if (err) {
-    console.log('WebMidi could not be enabled.', err)
-  } else {
-    console.log('WebMidi enabled!')
-
-    var inputs = WebMidi.inputs
-
-    console.log(inputs)
-  }
-})
 
 export default {
 
   data: function () {
     return {
 
-      label: ''
+      label: '',
+      inputs: []
     }
   },
-  compiled: () => {
-    console.log('compiled')
+  mounted () {
+    // console.log('compiled')
+
+    // console.log(WebMidi.inputs)
+
+    this.inputs = WebMidi.inputs
+
+    this.$emit('updated', this.inputs[0])
   }
 
 }
