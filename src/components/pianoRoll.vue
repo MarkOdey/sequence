@@ -12,6 +12,7 @@
   }
   .noteGrid {
     position:absolute;
+    min-width:100%;
     width:100%;
     height:100%;
     top:0px;
@@ -20,6 +21,7 @@
 
   .noteGridContainer {
     position: absolute;
+    min-width:100%;
   }
 
   .grid {
@@ -85,23 +87,22 @@
 
         </div>
 
-        <div :style="{
+        <div class="noteGridContainer" :style="{
           height: keyHeight*keyNotes.length+'px',
           left: keyWidth +'px'
-          }" class="noteGridContainer">
-          <div :style="{
+          }" >
+
+          <div class="noteGrid" :style="{
               height: keyHeight*keyNotes.length+'px',
               width:(tickWidth*channel.track.durationTicks +keyWidth)+'px'
 
-            }"
-
-            class="noteGrid">
+          }">
 
             <div class="grid"
               :style="{
-                  background : 'repeating-linear-gradient( to right, #EEE, #EEE '+tickWidth*rate+'px, #DDD '+tickWidth*rate+'px, #DDD '+tickWidth*rate*2+'px'
+                background : 'repeating-linear-gradient( to right, #EEE, #EEE '+tickWidth*rate+'px, #DDD '+tickWidth*rate+'px, #DDD '+tickWidth*rate*2+'px'
 
-              }">
+            }">
 
             </div>
 

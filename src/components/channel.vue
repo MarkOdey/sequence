@@ -1,6 +1,6 @@
 <template>
 
-  <div>
+  <div class="vh-50">
 
       <midiOut :updated="updateMidi()"/>
       <midiIn/>
@@ -9,6 +9,10 @@
         <pianoRoll :channel="channel"></pianoRoll>
       </div>
       <div class="synth"><synth :channel="channel"></synth></div>
+
+      <div>
+        <mixer :channel="channel"></mixer>
+      </div>
 
   </div>
 
@@ -19,6 +23,7 @@
 import midiOut from './midiOut.vue'
 import midiIn from './midiIn.vue'
 import pianoRoll from './pianoRoll.vue'
+import mixer from './mixer.vue'
 
 import Channel from '../factories/Channel.js'
 
@@ -29,7 +34,8 @@ export default {
     midiOut,
     synth,
     midiIn,
-    pianoRoll
+    pianoRoll,
+    mixer
   },
   watch: {
 

@@ -54,12 +54,21 @@ class Note {
       }
 
       console.log('scheduling a note')
-      if (this.ticks !== undefined) {
+      if (payload.ticks !== undefined) {
+        if (noteOnTimer !== undefined) {
+          Tone.Transport.cancel(noteOnTimer)
+        }
+
         noteOnTimer = Tone.Transport.schedule(noteOn, this.ticks + 'i')
       }
 
       // Once the noteOn fired we register the noteOff sequence.
-      if (this.durationTicks !== undefined) {
+      if (payload.durationTicks !== undefined || payload.ticks !== undefined) {
+        // Lets make sure that the noteoff is updated.
+        if (noteOffTimer !== undefined) {
+          Tone.Transport.cancel(noteOffTimer)
+        }
+
         noteOffTimer = Tone.Transport.schedule(noteOff, this.ticks + this.durationTicks + 'i')
       }
 

@@ -9,11 +9,13 @@ var inherits = require('util').inherits
 class Channel {
   constructor (payload) {
     this.track = []
-    this.audio = new Tone.AudioNode()
+    this.audio = new Tone.Channel()
     this.midiIn = {}
     this.midiOut = {}
 
     // console.log(payload)
+
+    this.audio.toMaster()
 
     this.playing = true
 

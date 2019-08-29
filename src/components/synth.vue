@@ -1,9 +1,27 @@
 <template>
-    <div>
 
-      <knob-control :min=0 :max=51 :stepSize=0.1  v-model="attack"></knob-control>
+  <div>
+    <div class="row">
+
+      <div class="col-12">
+        <knob-control :min=0 :max=2 :stepSize=0.001  v-model="attack"></knob-control>
+      </div>
+      <div class="col-12">
+        <span>Attack</span>
+      </div>
 
     </div>
+
+    <div class="row">
+           <div class="col-12">
+        <knob-control :min=0 :max=2 :stepSize=0.001  v-model="release"></knob-control>
+      </div>
+      <div class="col-12">
+        <span>Release</span>
+      </div>
+    </div>
+
+  </div>
 </template>
 
 <script>
@@ -24,10 +42,24 @@ export default {
       }
 
     },
+
+    release: {
+
+      handler: function (val) {
+        console.log(this.release + 'changed')
+
+        for (var i in this.polySynth.voices) {
+          this.polySynth.voices[i].envelope.release = val
+        }
+      }
+
+    },
     channel: {
 
       handler: function (payload) {
         console.log(payload)
+
+        self.polySynth.connect(self.channel.audio)
 
         if (payload.track !== undefined) {
           self.updateTrack(payload.track)
@@ -79,6 +111,7 @@ export default {
     self.notes = []
 
     console.log(this.channel)
+    self.polySynth.connect(self.channel.audio)
 
     this.channel.on('play', function () {
       // self.part.start()
@@ -100,7 +133,6 @@ export default {
     var polySynth = new Tone.PolySynth(6, synth)
 
     polySynth.volume.value = -20
-    polySynth.connect(self.channel.audio)
 
     return {
       data: {},

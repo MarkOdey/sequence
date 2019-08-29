@@ -20,7 +20,8 @@
     "tone": "^13.8.25",
     "vue": "^2.6.10",
     "vue-grid-layout": "^2.3.4",
-    "vue-knob-control": "^1.6.0",
+    "vue-knob-control": "git+ssh://git@github.com/MarkOdey/vue-knob-controll.git",
+    "vue-slider-control": "git+ssh://git@github.com/MarkOdey/vue-slider-control.git",
     "webmidi": "^2.5.1"
   },
   "devDependencies": {
