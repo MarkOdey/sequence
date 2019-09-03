@@ -1,6 +1,6 @@
 <template>
   <div id="app">
-    <midiFile file="deb_clai.mid" @update='updateMidi'></midiFile>
+    <midiFile file="beat.mid" @update='updateMidi'></midiFile>
     <div v-for="track in tracks" :key="track.id">
       <channel :track="track"></channel>
     </div>
@@ -19,6 +19,27 @@ import Tone from 'tone'
 export default {
 
   name: 'app',
+  head: {
+    // To use "this" in the component, it is necessary to return the object through a function
+    title: function () {
+      return {
+        inner: 'Title'
+      }
+    },
+    meta: [
+      { name: 'description', content: 'Sequencer app based on Tonejs', id: 'desc' },
+      { name: 'viewport', content: 'width=device-width, user-scalable=no' }
+    ]
+  },
+  css: {
+    loaderOptions: {
+      sass: {
+        data: `
+          @import "@/index.scss";
+        `
+      }
+    }
+  },
   data: function () {
     return {
       tracks: [],
@@ -31,6 +52,10 @@ export default {
       this.midi = midi
 
       this.tracks = midi.tracks
+
+      console.log(midi)
+
+      Tone.Transport.PPQ = midi.header.ppq
 
       Tone.Transport.loopStart = 0
       Tone.Transport.loopEnd = midi.durationTicks + 'i'
@@ -51,7 +76,7 @@ export default {
 
 <style>
 #app {
-  font-family: 'Avenir', Helvetica, Arial, sans-serif;
+  font-family: Ubuntu;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
   text-align: center;
@@ -59,11 +84,4 @@ export default {
   margin-top: 60px;
 }
 
-.pianoRoll {
-
-  width:100%;
-  height:300px;
-  position:relative;
-
-}
 </style>

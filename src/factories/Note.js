@@ -9,21 +9,32 @@ class Note {
     var self = this
     this.duration = 0
     this.durationTicks = 0
-
-    var noteOnTimer, noteOffTimer
+    this.noteOffTimer = undefined
+    this.noteOnTimer = undefined
 
     var noteOn = function noteOn () {
-      console.log('note fired')
+      // console.log('note fired')
       self.emit('noteOn', self)
     }
 
     var noteOff = function noteOff () {
-      console.log('note off')
+      // console.log('note off')
       self.emit('noteOff', self)
     }
 
+    this.select = function () {
+      console.log('firing select state.')
+      self.selected = true
+      self.emit('selected', self)
+    }
+
+    this.deselect = function () {
+      console.log('firing deselect state')
+      self.selected = false
+      self.emit('deselected', self)
+    }
     this.update = function (payload) {
-      console.log('updating')
+      // console.log('updating')
       if (payload.ticks !== undefined) {
         this.ticks = payload.ticks
         this.time = payload.ticks + 'i'
@@ -45,31 +56,22 @@ class Note {
         this.midi = payload.midi
       }
 
-      if (noteOnTimer !== undefined) {
-        Tone.Transport.cancel(noteOnTimer)
+      if (self.noteOnTimer !== undefined) {
+        Tone.Transport.clear(self.noteOnTimer)
       }
 
-      if (noteOffTimer !== undefined) {
-        Tone.Transport.cancel(noteOffTimer)
+      if (self.noteOffTimer !== undefined) {
+        Tone.Transport.clear(self.noteOffTimer)
       }
 
       console.log('scheduling a note')
       if (payload.ticks !== undefined) {
-        if (noteOnTimer !== undefined) {
-          Tone.Transport.cancel(noteOnTimer)
-        }
-
-        noteOnTimer = Tone.Transport.schedule(noteOn, this.ticks + 'i')
+        self.noteOnTimer = Tone.Transport.schedule(noteOn, this.ticks + 'i')
       }
 
       // Once the noteOn fired we register the noteOff sequence.
       if (payload.durationTicks !== undefined || payload.ticks !== undefined) {
-        // Lets make sure that the noteoff is updated.
-        if (noteOffTimer !== undefined) {
-          Tone.Transport.cancel(noteOffTimer)
-        }
-
-        noteOffTimer = Tone.Transport.schedule(noteOff, this.ticks + this.durationTicks + 'i')
+        self.noteOffTimer = Tone.Transport.schedule(noteOff, this.ticks + this.durationTicks + 'i')
       }
 
       // Lets loop through each notes to assign an id to it

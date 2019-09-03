@@ -1,5 +1,9 @@
 <style>
 
+  .signature {
+    width:40px;
+    display:inline;
+  }
   .pianoContainer {
 
     position:absolute;
@@ -10,6 +14,16 @@
     overflow:auto;
 
   }
+
+  .piano-bottom-menu {
+    height:20px;
+
+  }
+
+  .piano-left-menu {
+    height:300px;
+  }
+
   .noteGrid {
     position:absolute;
     min-width:100%;
@@ -25,6 +39,7 @@
   }
 
   .grid {
+    opacity: 0.5;
     position:absolute;
     width:100%;
     height:100%;
@@ -56,22 +71,47 @@
 
   }
 
+  .zoom-control {
+
+    float:right
+
+  }
+
+  .zoom-range {
+
+    width:150px!important;
+    display:inline-block;
+
+  }
+
+  .zoom-in {
+   display:inline-block;
+  }
+
+  .zoom-out {
+   display:inline-block;
+
+  }
 </style>
 
 <template>
 
   <div class="row pianoRoll">
-    <div class="col-1">
-      <font-awesome-icon @click="play()" icon="play" />
-      <font-awesome-icon @click="pause()" icon="pause" />
+    <div class="col-2">
+      <font-awesome-icon :class="{'d-none':playing}" @click="play()" icon="play" />
+      <font-awesome-icon :class="{'d-none':!playing}" @click="pause()" icon="pause" />
       <font-awesome-icon icon="circle" />
 
+      <signature></signature>
     </div>
 
-    <div class="col ">
+    <div class="col-10 piano-left-menu">
+
       <div  ref="pianoContainer" class="pianoContainer">
 
         <div ref="keyNoteBar"
+            @mousedown="keyNoteMousedown"
+            @touchstart="keyNoteTouchstart"
             :style="{
               width: keyWidth + 'px',
               height: keyHeight*keyNotes.length+'px',
@@ -106,6 +146,14 @@
 
             </div>
 
+            <div class="grid"
+              :style="{
+                background : 'repeating-linear-gradient( to top, #EEE, #EEE '+keyHeight+'px, #DDD '+keyHeight+'px, #DDD '+keyHeight*2+'px)'
+
+            }">
+
+            </div>
+
             <div class="cursor"
             :style="{
               left:cursor.ticks*tickWidth+'px'
@@ -116,9 +164,10 @@
               :index="note.index"
               :key="note.index"
               :data="note"
-              :tickWidth="tickWidth"
+              :tickWidth=tickWidth
               :keyHeight="keyHeight"
               @update="noteUpdated"
+              @selected="noteSelected"
             >{{note.i}}</note>
 
           </div>
@@ -127,13 +176,27 @@
       </div>
 
     </div>
+
+    <div class="col-12 piano-bottom-menu">
+
+      <!-- Zoom in Zoom control-->
+      <div class="zoom-control">
+        <font-awesome-icon class="zoom-in" @click="zoomW(-0.1)" icon="search-minus" />
+        <b-form-input  class="zoom-range" id="controls"  v-model=zoom type="range" min="0" max="1" step="0.001"></b-form-input>
+        <font-awesome-icon  class="zoom-out" @click="zoomW(+0.1)" icon="search-plus" />
+      </div>
+
+    </div>
+
   </div>
+
 </template>
 
 <script>
 
 import note from './note.vue'
 import keyNote from './keyNote.vue'
+import signature from './signature.vue'
 
 import Tone from 'tone'
 
@@ -169,10 +232,18 @@ export default {
 
     window.requestAnimationFrame(animate)
 
-    console.log(this.channel.track)
+    // console.log(this.channel.track)
 
     this.channel.track.on('updated', function (track) {
-      console.log(track)
+      // console.log(track)
+    })
+
+    this.channel.on('play', function () {
+      vm.playing = true
+    })
+
+    this.channel.on('pause', function () {
+      vm.playing = false
     })
   },
 
@@ -186,6 +257,10 @@ export default {
     keyHeight (val) {
       console.log('key Height changed')
       console.log(val)
+    },
+    zoom () {
+      console.log(this.zoom)
+      this.tickWidth = Number(this.zoom)
     }
 
   },
@@ -205,11 +280,54 @@ export default {
 
       dom.style.left = e.target.scrollLeft + 'px'
     },
-    noteUpdated: function (payload) {
-      console.log(payload)
-      console.log(this.channel.track)
+
+    keyNoteMousedown: function (e) {
+      this.initialKeyHeight = this.keyHeight
+      this.initialOffsetY = e.clientY
+      console.log('mouse height')
+      window.document.addEventListener('mousemove', this.keyNoteMousemove)
+      window.document.addEventListener('mouseup', this.keyNoteMouseup)
+    },
+    keyNoteMousemove: function (e) {
+      var distance = this.initialOffsetY - e.clientY
+
+      console.log('whhhuuu')
+
+      if (this.initialKeyHeight + distance > 0.1) {
+        this.keyHeight = this.initialKeyHeight + distance
+      }
+
+      // console.log(distance)
+    },
+
+    keyNoteMouseup: function (e) {
+      window.document.removeEventListener('mousemove', this.keyNoteMousemove)
+      window.document.removeEventListener('mouseup', this.keyNoteMouseup)
+    },
+
+    keyNoteTouchstart: function (e) {
+
+    },
+
+    zoomW: function (increment) {
+      this.zoom += increment
+    },
+    noteSelected: function (payload) {
+      // console.log(payload)
+      // console.log(this.channel.track)
 
       // this.channel.track.updateNote(payload)
+    },
+    noteUpdated: function (payload) {
+      // console.log(payload)
+      // console.log(this.channel.track)
+
+      // this.channel.track.updateNote(payload)
+    }
+  },
+  computed: {
+    'PPQ': function () {
+      return Tone.Transport.PPQ
     }
   },
 
@@ -222,13 +340,16 @@ export default {
 
       },
 
+      playing: false,
+
       durationTicks: 100,
       noteRange: noteRange,
       keyNotes: keyNotes,
       keyHeight: 20,
       keyWidth: 100,
       tickWidth: tickWidth,
-      rate: 16
+      zoom: 1,
+      rate: 32
 
     }
   },
@@ -237,7 +358,8 @@ export default {
   },
   components: {
     note,
-    keyNote
+    keyNote,
+    signature
 
   }
 

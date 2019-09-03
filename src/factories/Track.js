@@ -26,6 +26,23 @@ class Track {
         self.emit('noteUpdated', note)
         self.emit('updated', this)
       })
+
+      note.on('selected', function (note) {
+        self.deselectAll([note])
+      })
+    }
+
+    /**
+     * Deselect all
+     */
+    this.deselectAll = function (excludes) {
+      for (var i in self.notes) {
+        if (excludes.indexOf(self.notes[i]) === -1) {
+          continue
+        }
+
+        self.notes[i].deselect()
+      }
     }
 
     this.update = function (payload) {

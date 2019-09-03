@@ -1,7 +1,8 @@
 <template>
     <div :style="{
-        bottom: keyHeight*value + 'px',
-        height: keyHeight + 'px'
+        'bottom': keyHeight*value + 'px',
+        'height': keyHeight + 'px',
+        'line-height': keyHeight + 'px'
 
         }"
         :class="{
@@ -53,8 +54,7 @@ export default {
     position:absolute;
     left:0px;
     width:100%;
-
-    border:1px solid rgba(0,0,0,0.1);
+    font-size:1.5vh;
 
   }
 

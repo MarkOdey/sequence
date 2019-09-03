@@ -39,11 +39,13 @@ class Channel {
 
     this.play = (payload) => {
       Tone.Transport.start()
+      this.playing = true
       this.emit('play', payload)
     }
 
     this.pause = (payload) => {
       Tone.Transport.pause()
+      this.playing = false
       this.emit('pause', payload)
     }
 

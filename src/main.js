@@ -1,4 +1,7 @@
 import Vue from 'vue'
+import VueRouter from 'vue-router'
+import VueHead from 'vue-head'
+
 import App from './App.vue'
 
 import { library } from '@fortawesome/fontawesome-svg-core'
@@ -7,8 +10,12 @@ import { FontAwesomeIcon } from '@fortawesome/vue-fontawesome'
 
 import BootstrapVue from 'bootstrap-vue'
 
-import 'bootstrap/dist/css/bootstrap.css'
-import 'bootstrap-vue/dist/bootstrap-vue.css'
+import './assets/global.css'
+
+import './assets/index.scss'
+
+Vue.use(VueHead)
+Vue.use(VueRouter)
 
 Vue.use(BootstrapVue)
 
