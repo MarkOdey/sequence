@@ -1,6 +1,6 @@
 <template>
   <div id="app">
-    <midiFile file="beat.mid" @update='updateMidi'></midiFile>
+    <midiFile file="beethoven_fur_elise.mid" @update='updateMidi'></midiFile>
     <div v-for="track in tracks" :key="track.id">
       <channel :track="track"></channel>
     </div>

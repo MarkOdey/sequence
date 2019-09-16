@@ -112,35 +112,8 @@ export default {
       var self = this
 
       // console.log(track)
-
-      // console.log(this.channel.track)
-      for (var i in track.notes) {
-        var note = track.notes[i]
-
-        note.on('noteOn', function (payload) {
-          // console.log('note on!!!')
-          // console.log(payload)
-          // Converting midi note to pitch.
-          var pitch = Tone.Frequency(payload.midi, 'midi').toNote()
-          // the notes given as the second element in the array
-          // will be passed in as the second argument
-          self.polySynth.triggerAttackRelease(pitch, payload.durationTicks + 'i')
-        })
-
-        note.on('noteOff', function (payload) {
-          // console.log('note off!!')
-          // console.log(payload)
-          // Converting midi note to pitch.
-          var pitch = Tone.Frequency(payload.midi, 'midi').toNote()
-          // self.polySynth.triggerRelease(pitch)
-        })
-      }
-
-      track.on('noteUpdated', function (payload) {
-        console.log('note updated')
-        // console.log(payload)
-      })
     }
+
   },
 
   beforeMount: function () {
@@ -159,7 +132,23 @@ export default {
     })
 
     if (this.channel.track !== undefined) {
-      this.updateTrack(this.channel.track)
+      this.channel.track.on('noteOn', function (note) {
+        // console.log('note on!!!')
+        // console.log(note)
+        // Converting midi note to pitch.
+        var pitch = Tone.Frequency(note.midi, 'midi').toNote()
+        // the notes given as the second element in the array
+        // will be passed in as the second argument
+        self.polySynth.triggerAttackRelease(pitch, note.durationTicks + 'i')
+      })
+
+      this.channel.track.on('noteOff', function (note) {
+        // console.log('note off!!')
+        // console.log(note)
+        // Converting midi note to pitch.
+        var pitch = Tone.Frequency(note.midi, 'midi').toNote()
+        // self.polySynth.triggerRelease(pitch)
+      })
 
       this.channel.track.on('updated', self.updateTrack)
     }

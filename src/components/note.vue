@@ -1,13 +1,14 @@
 <template >
-    <div :class="{'selected' : data.selected}" @mousedown="mousedown" @touchstart="touchstart"
-    :style="{
+    <div
+      :class="{'selected' : selected}" @mousedown="mousedown" @touchstart="touchstart"
+      :style="{
         'bottom':data.midi*keyHeight+'px',
         'left':data.ticks*tickWidth+'px',
         'width':data.durationTicks*tickWidth +'px',
         'height': keyHeight + 'px',
         'line-height':keyHeight+'px'
 
-    }"
+      }"
 
     >{{data.midi | toNote}}</div>
 </template>
@@ -15,25 +16,42 @@
 <script>
 
 import Tone from 'tone'
+import Note from '../factories/Note.js'
 
 export default {
   name: 'note',
+  mounted: function () {
+    let self = this
+    if (this.data === undefined) {
+      return
+    }
+    this.data.setElement(this.$el)
+
+    this.data.on('move', function (payload) {
+
+    })
+
+    this.data.on('selected', function () {
+      console.log('SELECTED!!!!!!!!!!!!!!!!!!!!!11')
+
+      self.selected = true
+    })
+    this.data.on('deselected', function () {
+      self.selected = false
+    })
+  },
+
   methods: {
     touchstart: function (event) {
+      console.log('at touch start')
       // Emitting the selected state.
-      this.$emit('selected', this)
-      // console.log('touch move');
-      if (event.touches.length === 1) {
-        const touch = event.targetTouches.item(0)
-        const offsetX = touch.clientX
-        const offsetY = touch.clientY
-        this.move(offsetX, offsetY)
-      }
+      this.$emit('down', event)
 
       window.document.addEventListener('touchend', this.touchend)
       window.document.addEventListener('touchmove', this.touchmove)
     },
     touchmove: function (event) {
+      this.$emit('move', event)
       if (event.touches.length === 1) {
         const touch = event.targetTouches.item(0)
         const offsetX = touch.clientX
@@ -42,6 +60,7 @@ export default {
       }
     },
     touchend: function (event) {
+      this.$emit('up', event)
       if (event.touches.length === 1) {
         const touch = event.targetTouches.item(0)
         const offsetX = touch.clientX
@@ -52,47 +71,19 @@ export default {
       window.document.removeEventListener('touchmove', this.touchmove)
     },
     mousedown: function (event) {
-      console.log(event)
-
-      // Emitting the selected state
-
-      this.data.select()
-
-      this.initialOffsetX = event.offsetX
-
-      var x = event.clientX
-      var y = event.clientY
-      this.move(x, y)
+      this.$emit('down', event, this.data)
 
       window.document.addEventListener('mousemove', this.mousemove)
       window.document.addEventListener('mouseup', this.mouseup)
     },
     mouseup: function (event) {
-      var x = event.clientX
-      var y = event.clientY
-
-      this.move(x, y)
+      this.$emit('down', event, this.data)
 
       window.document.removeEventListener('mousemove', this.mousemove)
       window.document.removeEventListener('mouseup', this.mouseup)
     },
     mousemove: function (event) {
-      var x = event.clientX
-      var y = event.clientY
-      this.move(x, y)
-    },
-    move: function (x, y) {
-      console.log(this.initialOffsetX)
-      var parent = event.target.parentElement
-      var bounds = parent.getBoundingClientRect()
-      x = (x - bounds.left) + (-this.initialOffsetX)
-      y = (y - bounds.top)
-      var ticks = Math.round(x / this.tickWidth)
-      var midi = Math.floor((bounds.height - y) / this.keyHeight)
-      console.log(this)
-
-      this.data.update({ midi: midi, ticks: ticks })
-      // this.$emit('update', { index: this.index, midi: midi, ticks: ticks })
+      this.$emit('move', event, this.data)
     }
 
   },
@@ -104,9 +95,7 @@ export default {
   },
   data: function () {
     return {
-
-      initialOffsetY: 0,
-      initialOffsetX: 0
+      selected: false
 
     }
   },
@@ -122,7 +111,7 @@ export default {
 <style lang="scss">
 
 .note.selected {
-  border:green solid 1px;
+  border: var(--secondary) dashed 1px;
 }
 
 .note {

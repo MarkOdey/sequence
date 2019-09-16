@@ -10,7 +10,7 @@ import { FontAwesomeIcon } from '@fortawesome/vue-fontawesome'
 
 import BootstrapVue from 'bootstrap-vue'
 
-import './assets/global.css'
+import './assets/global.scss'
 
 import './assets/index.scss'
 

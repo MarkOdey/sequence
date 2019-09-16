@@ -17,6 +17,22 @@ class Track {
 
     this.ticks = 0
 
+    this.getNotesBetween = function (start, end, keyStart, keyEnd) {
+      var notes = []
+      // console.log(start, end)
+      for (var i in this.notes) {
+        var note = this.notes[i]
+
+        // console.log(keyStart, keyEnd, note.midi)
+        if (start < note.ticks && end > note.ticks &&
+          keyStart < note.midi && keyEnd > note.midi) {
+          notes.push(note)
+        }
+      }
+
+      return notes
+    }
+
     this.addNote = function (payload) {
       var note = new Note(payload)
       this.notes.push(note)
@@ -24,11 +40,15 @@ class Track {
 
       note.on('updated', function (note) {
         self.emit('noteUpdated', note)
-        self.emit('updated', this)
+        self.emit('updated', self)
       })
 
-      note.on('selected', function (note) {
-        self.deselectAll([note])
+      note.on('noteOn', function (note) {
+        self.emit('noteOn', note)
+      })
+
+      note.on('noteoff', function (note) {
+        self.emit('noteOff', note)
       })
     }
 
@@ -37,11 +57,32 @@ class Track {
      */
     this.deselectAll = function (excludes) {
       for (var i in self.notes) {
-        if (excludes.indexOf(self.notes[i]) === -1) {
+        if (excludes !== undefined && excludes.indexOf(self.notes[i]) !== -1) {
           continue
         }
 
         self.notes[i].deselect()
+      }
+    }
+
+    this.getSelected = function () {
+      var notes = []
+      for (var i in self.notes) {
+        var note = self.notes[i]
+        if (note.selected === true) {
+          notes.push(note)
+        }
+      }
+
+      return notes
+    }
+
+    this.hasSelected = function () {
+      var selected = this.getSelected()
+      if (selected.length === 0) {
+        return false
+      } else {
+        return true
       }
     }
 

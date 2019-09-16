@@ -45,6 +45,8 @@
     height:100%;
     left:0px;
     top:0px;
+      touch-action: none;
+      user-select: none;
   }
 
   .cursor {
@@ -102,12 +104,12 @@
       <font-awesome-icon :class="{'d-none':!playing}" @click="pause()" icon="pause" />
       <font-awesome-icon icon="circle" />
 
-      <signature></signature>
+      <noteField :value="durationTicks+'i'"></noteField>
     </div>
 
     <div class="col-10 piano-left-menu">
 
-      <div  ref="pianoContainer" class="pianoContainer">
+      <div ref="pianoContainer" class="pianoContainer">
 
         <div ref="keyNoteBar"
             @mousedown="keyNoteMousedown"
@@ -127,7 +129,7 @@
 
         </div>
 
-        <div class="noteGridContainer" :style="{
+        <div  class="noteGridContainer" :style="{
           height: keyHeight*keyNotes.length+'px',
           left: keyWidth +'px'
           }" >
@@ -135,10 +137,9 @@
           <div class="noteGrid" :style="{
               height: keyHeight*keyNotes.length+'px',
               width:(tickWidth*channel.track.durationTicks +keyWidth)+'px'
+            }">
 
-          }">
-
-            <div class="grid"
+            <div  class="grid"
               :style="{
                 background : 'repeating-linear-gradient( to right, #EEE, #EEE '+tickWidth*rate+'px, #DDD '+tickWidth*rate+'px, #DDD '+tickWidth*rate*2+'px'
 
@@ -146,7 +147,7 @@
 
             </div>
 
-            <div class="grid"
+            <div  @mousedown="backgroundMouseDown" class="grid"
               :style="{
                 background : 'repeating-linear-gradient( to top, #EEE, #EEE '+keyHeight+'px, #DDD '+keyHeight+'px, #DDD '+keyHeight*2+'px)'
 
@@ -154,12 +155,15 @@
 
             </div>
 
+            <selectionBox :data="selectionBox"></selectionBox>
+
             <div class="cursor"
             :style="{
               left:cursor.ticks*tickWidth+'px'
             }"></div>
 
             <note class="note"
+
               v-for="note in channel.track.notes"
               :index="note.index"
               :key="note.index"
@@ -168,6 +172,9 @@
               :keyHeight="keyHeight"
               @update="noteUpdated"
               @selected="noteSelected"
+              @down="noteDown"
+              @move="noteMove"
+              @up="noteUp"
             >{{note.i}}</note>
 
           </div>
@@ -180,10 +187,16 @@
     <div class="col-12 piano-bottom-menu">
 
       <!-- Zoom in Zoom control-->
-      <div class="zoom-control">
+      <div class="p-1 zoom-control float-right">
         <font-awesome-icon class="zoom-in" @click="zoomW(-0.1)" icon="search-minus" />
         <b-form-input  class="zoom-range" id="controls"  v-model=zoom type="range" min="0" max="1" step="0.001"></b-form-input>
         <font-awesome-icon  class="zoom-out" @click="zoomW(+0.1)" icon="search-plus" />
+      </div>
+
+      <div class="btn btn-primary follow-cursor float-right">
+
+        <font-awesome-icon class="i-cursor" @click="toggleFollowCursor()" icon="i-cursor" />
+
       </div>
 
     </div>
@@ -196,10 +209,11 @@
 
 import note from './note.vue'
 import keyNote from './keyNote.vue'
-import signature from './signature.vue'
+import noteField from './noteField.vue'
+import selectionBox from './selectionBox.vue'
 
 import Tone from 'tone'
-
+import SelectionBox from '../factories/SelectionBox.js'
 let noteRange = 128
 
 let keyNotes = []
@@ -224,6 +238,24 @@ export default {
 
     function animate () {
       vm.cursor.ticks = Tone.Transport.ticks % vm.channel.track.durationTicks
+      vm.durationTicks = vm.channel.track.durationTicks
+
+      var offset = vm.cursor.ticks * tickWidth
+
+      if (
+        vm.playing == true &&
+        vm.followCursor === true && (
+          offset <= vm.$refs.pianoContainer.scrollLeft ||
+        offset >= vm.$refs.pianoContainer.scrollLeft + vm.$refs.pianoContainer.offsetWidth)) {
+        console.log(vm.$refs.pianoContainer.offsetWidth)
+
+        vm.$refs.pianoContainer.scrollLeft = offset - 20
+
+        // Updating keybar to be at the right position
+        var dom = vm.$refs.keyNoteBar
+
+        dom.style.left = vm.$refs.pianoContainer.scrollLeft + 'px'
+      }
 
       window.setTimeout(function () {
         window.requestAnimationFrame(animate)
@@ -245,11 +277,43 @@ export default {
     this.channel.on('pause', function () {
       vm.playing = false
     })
+
+    this.selectionBox.on('rangeSelected', function (event) {
+      // console.log(event)
+
+      var ticks = event.x / vm.tickWidth
+      var durationTicks = (event.x + event.width) / vm.tickWidth
+
+      var keyStart = (event.y) / vm.keyHeight
+      var keyEnd = (event.y + event.height) / vm.keyHeight
+
+      var notes = vm.channel.track.getNotesBetween(ticks, durationTicks, keyStart, keyEnd)
+
+      console.log(notes)
+
+      for (var i in notes) {
+        notes[i].select()
+      }
+    })
   },
 
   mounted: function () {
     this.id = this._uid
     this.$refs.pianoContainer.addEventListener('scroll', this.handleScroll)
+
+    this.$el.addEventListener('mouseover', function () {
+      this.focused = true
+    })
+    this.$el.addEventListener('mouseout', function () {
+      this.focused = false
+    })
+
+    this.$el.addEventListener('touchenter', function () {
+      this.focused = true
+    })
+    this.$el.addEventListener('touchleave', function () {
+      this.focused = false
+    })
   },
 
   watch: {
@@ -265,6 +329,50 @@ export default {
 
   },
   methods: {
+    backgroundMouseDown: function (event) {
+      var self = this
+
+      if (!this.doubleClickedInvoked) {
+        this.doubleClickedInvoked = true
+        window.setTimeout(function () {
+          self.doubleClickedInvoked = false
+        }, 300)
+      } else {
+        // Double click event fired.
+        console.log('Tapped twice')
+        // Resetting state.
+        this.doubleClickedInvoked = false
+
+        var x = event.clientX
+        var y = event.clientY
+
+        // If the event is fired from a mobile device
+        if (event.touches !== undefined && event.touches.length === 1) {
+          const touch = event.targetTouches.item(0)
+          x = touch.clientX
+          y = touch.clientY
+        }
+
+        var parent = event.target.parentElement
+        var bounds = parent.getBoundingClientRect()
+
+        var noteX = (x - bounds.left)
+        var noteY = (y - bounds.top)
+
+        var ticks = Math.round(noteX / this.tickWidth)
+        var midi = Math.floor((bounds.height - noteY) / this.keyHeight)
+
+        self.channel.track.addNote({ 'midi': midi, 'ticks': ticks, 'durationTicks': self.rate })
+
+        // console.log(this)
+      }
+
+      if (self.channel.track.selected === undefined) {
+        self.channel.track.deselectAll()
+      }
+
+      self.selectionBox.activate(event)
+    },
     play: function (e) {
       console.log('starting')
       this.channel.play()
@@ -273,14 +381,13 @@ export default {
       this.channel.pause()
     },
     handleScroll: function (e) {
-      // console.log(e.target.scrollLeft)
-      // console.log(this.$refs.keyNoteBar)
-
       var dom = this.$refs.keyNoteBar
 
       dom.style.left = e.target.scrollLeft + 'px'
     },
-
+    toggleFolowCursor: function (e) {
+      this.followCursor = !this.followCursor
+    },
     keyNoteMousedown: function (e) {
       this.initialKeyHeight = this.keyHeight
       this.initialOffsetY = e.clientY
@@ -308,15 +415,82 @@ export default {
     keyNoteTouchstart: function (e) {
 
     },
+    noteUp: function (event, note) {
 
+    },
+    noteDown: function (event, note) {
+      if (!event) event = window.event
+      if (event.shiftKey) {
+        /* shift is down */
+        note.select()
+      } else if (event.altKey) {
+        /* alt is down */
+      } else if (event.ctrlKey) {
+        /* ctrl is down */
+
+      } else if (event.metaKey) {
+        /* cmd is down */
+      } else {
+        /* No key is down */
+
+        this.initialClientX = event.clientX
+        this.initialClientY = event.clientY
+        // Let Check if the note is already selected.
+        if (note.selected === true) {
+          var selectedNotes = this.channel.track.getSelected()
+          for (var i in selectedNotes) {
+            var selectedNote = selectedNotes[i]
+            selectedNote.startDrag(event)
+          }
+        } else {
+          this.channel.track.deselectAll()
+          note.select()
+        }
+      }
+    },
+    noteMove: function (event, note) {
+      var x = event.clientX
+      var y = event.clientY
+
+      // If the event is fired from a mobile device
+      if (event.touches !== undefined && event.touches.length === 1) {
+        const touch = event.targetTouches.item(0)
+        x = touch.clientX
+        y = touch.clientY
+      }
+
+      x -= this.initialClientX
+      y -= this.initialClientY
+
+      var parent = event.target.parentElement
+      var bounds = parent.getBoundingClientRect()
+
+      var selectedNotes = this.channel.track.getSelected()
+
+      for (var i in selectedNotes) {
+        var selectedNote = selectedNotes[i]
+
+        console.log(selectedNote)
+
+        if (selectedNote.initialClientX === undefined || selectedNote.initialClientY === undefined) {
+          continue
+        }
+        var noteX = (x - bounds.left) + (selectedNote.initialClientX)
+        var noteY = (y - bounds.top) + (selectedNote.initialClientY)
+
+        var ticks = Math.round(noteX / this.tickWidth)
+        var midi = Math.floor((bounds.height - noteY) / this.keyHeight)
+        // console.log(this)
+
+        selectedNote.update({ midi: midi, ticks: ticks })
+      // this.$emit('update', { index: this.index, midi: midi, ticks: ticks })
+      }
+    },
     zoomW: function (increment) {
       this.zoom += increment
     },
     noteSelected: function (payload) {
-      // console.log(payload)
-      // console.log(this.channel.track)
 
-      // this.channel.track.updateNote(payload)
     },
     noteUpdated: function (payload) {
       // console.log(payload)
@@ -335,21 +509,30 @@ export default {
     return {
       notes: [],
 
+      selectionBox: new SelectionBox(),
+
       cursor: {
         ticks: 0
 
       },
 
+      doubleClickedInvoked: false,
+
+      focused: false,
       playing: false,
 
       durationTicks: 100,
       noteRange: noteRange,
       keyNotes: keyNotes,
+
+      initialClientX: 0,
+      initialClientY: 0,
       keyHeight: 20,
       keyWidth: 100,
       tickWidth: tickWidth,
+      followCursor: true,
       zoom: 1,
-      rate: 32
+      rate: 256
 
     }
   },
@@ -358,8 +541,9 @@ export default {
   },
   components: {
     note,
+    selectionBox,
     keyNote,
-    signature
+    noteField
 
   }
 

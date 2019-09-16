@@ -3,7 +3,9 @@ import Tone from 'tone'
 var EventEmitter = require('events')
 
 var inherits = require('util').inherits
-
+/**
+ *
+ */
 class Note {
   constructor (payload) {
     var self = this
@@ -11,6 +13,8 @@ class Note {
     this.durationTicks = 0
     this.noteOffTimer = undefined
     this.noteOnTimer = undefined
+    this.initialClientX = undefined
+    this.initialClientY = undefined
 
     var noteOn = function noteOn () {
       // console.log('note fired')
@@ -22,8 +26,24 @@ class Note {
       self.emit('noteOff', self)
     }
 
+    this.setElement = function (element) {
+      this.element = element
+    }
+
+    this.startDrag = function (event) {
+      self.dragging = true
+
+      var bounds = this.element.getBoundingClientRect()
+
+      self.initialClientX = bounds.left
+      self.initialClientY = bounds.top
+
+      self.emit('startDrag', event)
+    }
+
     this.select = function () {
       console.log('firing select state.')
+
       self.selected = true
       self.emit('selected', self)
     }
