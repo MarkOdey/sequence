@@ -1,18 +1,17 @@
 <template>
+  <div class="container-fluid">
+    <div class="row flex-row flex-nowrap">
 
-  <div class="vh-50">
+        <midiOut :updated="updateMidi()"/>
+        <midiIn/>
 
-      <midiOut :updated="updateMidi()"/>
-      <midiIn/>
-
-      <div>
         <pianoRoll :channel="channel"></pianoRoll>
-      </div>
-      <div class="synth"><synth :channel="channel"></synth></div>
 
-      <div>
+        <synth :channel="channel"></synth>
+
         <mixer :channel="channel"></mixer>
-      </div>
+
+    </div>
 
   </div>
 
@@ -22,7 +21,7 @@
 
 import midiOut from './midiOut.vue'
 import midiIn from './midiIn.vue'
-import pianoRoll from './pianoRoll.vue'
+import pianoRoll from './PianoRoll/pianoRoll.vue'
 import mixer from './mixer.vue'
 
 import Channel from '../factories/Channel.js'

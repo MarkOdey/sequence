@@ -1,6 +1,6 @@
 <template>
   <div id="app">
-    <midiFile file="beethoven_fur_elise.mid" @update='updateMidi'></midiFile>
+    <midiFile file="chopin_nocturneop9nr1.mid" @update='updateMidi'></midiFile>
     <div v-for="track in tracks" :key="track.id">
       <channel :track="track"></channel>
     </div>
@@ -56,7 +56,7 @@ export default {
       console.log(midi)
 
       Tone.Transport.PPQ = midi.header.ppq
-
+      Tone.context.latencyHint = 'fastest'
       Tone.Transport.loopStart = 0
       Tone.Transport.loopEnd = midi.durationTicks + 'i'
       Tone.Transport.loop = true

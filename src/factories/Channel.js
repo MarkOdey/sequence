@@ -38,7 +38,7 @@ class Channel {
     }
 
     this.play = (payload) => {
-      Tone.Transport.start()
+      Tone.Transport.start('+1')
       this.playing = true
       this.emit('play', payload)
     }

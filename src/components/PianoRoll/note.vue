@@ -16,10 +16,14 @@
 <script>
 
 import Tone from 'tone'
-import Note from '../factories/Note.js'
+import Note from '../../factories/Note.js'
 
 export default {
   name: 'note',
+  beforeDestroy: function () {
+    this.data.removeListener('selected', this.onSelected)
+    this.data.removeListener('deselected', this.onDeselected)
+  },
   mounted: function () {
     let self = this
     if (this.data === undefined) {
@@ -27,21 +31,19 @@ export default {
     }
     this.data.setElement(this.$el)
 
-    this.data.on('move', function (payload) {
-
-    })
-
-    this.data.on('selected', function () {
-      console.log('SELECTED!!!!!!!!!!!!!!!!!!!!!11')
-
-      self.selected = true
-    })
-    this.data.on('deselected', function () {
-      self.selected = false
-    })
+    this.data.on('selected', this.onSelected)
+    this.data.on('deselected', this.onDeselected)
   },
 
   methods: {
+    onSelected: function () {
+      console.log('SELECTED!!!!!!!!!!!!!!!!!!!!!11')
+
+      self.selected = true
+    },
+    onDeselected: function () {
+      self.selected = false
+    },
     touchstart: function (event) {
       console.log('at touch start')
       // Emitting the selected state.

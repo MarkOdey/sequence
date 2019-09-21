@@ -4,6 +4,10 @@
     width:40px;
     display:inline;
   }
+
+  .pianoRoll {
+    height:100%;
+  }
   .pianoContainer {
 
     position:absolute;
@@ -15,8 +19,18 @@
 
   }
 
+  .piano-main {
+    display: flex;
+    flex-flow: column;
+
+  }
+  .piano-main-content {
+    flex:1;
+    position:relative;
+
+  }
   .piano-bottom-menu {
-    height:20px;
+    min-height:40px;
 
   }
 
@@ -97,7 +111,7 @@
 </style>
 
 <template>
-
+  <div class="col-12">
   <div class="row pianoRoll">
     <div class="col-2">
       <font-awesome-icon :class="{'d-none':playing}" @click="play()" icon="play" />
@@ -107,75 +121,105 @@
       <noteField :value="durationTicks+'i'"></noteField>
     </div>
 
-    <div class="col-10 piano-left-menu">
+    <div class="col piano-main">
 
-      <div ref="pianoContainer" class="pianoContainer">
+      <div class="row piano-main-content">
 
-        <div ref="keyNoteBar"
-            @mousedown="keyNoteMousedown"
-            @touchstart="keyNoteTouchstart"
-            :style="{
-              width: keyWidth + 'px',
-              height: keyHeight*keyNotes.length+'px',
-            }" class="keyNoteBar">
+        <div ref="pianoContainer" class="pianoContainer">
 
-          <keyNote
-            v-for="keyNote in keyNotes"
-            :key="keyNote.value"
-            :value="keyNote.value"
-            :keyHeight="keyHeight"
+          <div ref="keyNoteBar"
+              @mousedown="keyNoteMousedown"
+              @touchstart="keyNoteTouchstart"
+              :style="{
+                width: keyWidth + 'px',
+                height: keyHeight*keyNotes.length+'px',
+              }" class="keyNoteBar">
 
-          ></keyNote>
+            <keyNote
+              v-for="keyNote in keyNotes"
+              :key="keyNote.value"
+              :value="keyNote.value"
+              :keyHeight="keyHeight"
+
+            ></keyNote>
+
+          </div>
+
+          <div  class="noteGridContainer" :style="{
+            height: keyHeight*keyNotes.length+'px',
+            left: keyWidth +'px'
+            }" >
+
+            <div class="noteGrid" :style="{
+                height: keyHeight*keyNotes.length+'px',
+                width:(tickWidth*channel.track.durationTicks +keyWidth)+'px'
+              }">
+
+              <div  class="grid"
+                :style="{
+                  background : 'repeating-linear-gradient( to right, #EEE, #EEE '+tickWidth*rate+'px, #DDD '+tickWidth*rate+'px, #DDD '+tickWidth*rate*2+'px'
+
+              }">
+
+              </div>
+
+              <div  @mousedown="backgroundMouseDown" class="grid"
+                :style="{
+                  background : 'repeating-linear-gradient( to top, #EEE, #EEE '+keyHeight+'px, #DDD '+keyHeight+'px, #DDD '+keyHeight*2+'px)'
+
+              }">
+
+              </div>
+
+              <selectionBox :data="selectionBox"></selectionBox>
+
+              <div class="cursor"
+              :style="{
+                left:cursor.ticks*tickWidth+'px'
+              }"></div>
+
+              <note class="note"
+
+                v-for="note in notesInView"
+                :index="note.index"
+                :key="note.index"
+                :data="note"
+                :tickWidth=tickWidth
+                :keyHeight="keyHeight"
+                @update="noteUpdated"
+                @selected="noteSelected"
+                @down="noteDown"
+                @move="noteMove"
+                @up="noteUp"
+              >{{note.i}}</note>
+
+            </div>
+          </div>
 
         </div>
+      </div>
 
-        <div  class="noteGridContainer" :style="{
-          height: keyHeight*keyNotes.length+'px',
-          left: keyWidth +'px'
-          }" >
+      <div class="row piano-bottom-menu">
 
-          <div class="noteGrid" :style="{
-              height: keyHeight*keyNotes.length+'px',
-              width:(tickWidth*channel.track.durationTicks +keyWidth)+'px'
-            }">
+        <div class="col-12">
+          <!-- Zoom in Zoom control-->
+          <div class="float-right">
 
-            <div  class="grid"
-              :style="{
-                background : 'repeating-linear-gradient( to right, #EEE, #EEE '+tickWidth*rate+'px, #DDD '+tickWidth*rate+'px, #DDD '+tickWidth*rate*2+'px'
+              <font-awesome-icon class="zoom-in" @click="zoomW(-0.1)" icon="search-minus" />
+              <b-form-input  class="zoom-range" id="controls"  v-model=zoom type="range" min="0" max="1" step="0.001"></b-form-input>
+              <font-awesome-icon  class="zoom-out" @click="zoomW(+0.1)" icon="search-plus" />
 
-            }">
+          </div>
 
+          <div class="float-right">
+
+            <div :class="{ active : followCursor}" @click="toggleFollowCursor()" class=" btn btn-outline-secondary follow-cursor ">
+              <font-awesome-icon class="i-cursor" icon="i-cursor" />
             </div>
 
-            <div  @mousedown="backgroundMouseDown" class="grid"
-              :style="{
-                background : 'repeating-linear-gradient( to top, #EEE, #EEE '+keyHeight+'px, #DDD '+keyHeight+'px, #DDD '+keyHeight*2+'px)'
-
-            }">
-
+            <div class="btn btn-outline-secondary">
+              <font-awesome-icon class="edit"  icon="edit" />
             </div>
-
-            <selectionBox :data="selectionBox"></selectionBox>
-
-            <div class="cursor"
-            :style="{
-              left:cursor.ticks*tickWidth+'px'
-            }"></div>
-
-            <note class="note"
-
-              v-for="note in channel.track.notes"
-              :index="note.index"
-              :key="note.index"
-              :data="note"
-              :tickWidth=tickWidth
-              :keyHeight="keyHeight"
-              @update="noteUpdated"
-              @selected="noteSelected"
-              @down="noteDown"
-              @move="noteMove"
-              @up="noteUp"
-            >{{note.i}}</note>
 
           </div>
         </div>
@@ -184,22 +228,7 @@
 
     </div>
 
-    <div class="col-12 piano-bottom-menu">
-
-      <!-- Zoom in Zoom control-->
-      <div class="p-1 zoom-control float-right">
-        <font-awesome-icon class="zoom-in" @click="zoomW(-0.1)" icon="search-minus" />
-        <b-form-input  class="zoom-range" id="controls"  v-model=zoom type="range" min="0" max="1" step="0.001"></b-form-input>
-        <font-awesome-icon  class="zoom-out" @click="zoomW(+0.1)" icon="search-plus" />
-      </div>
-
-      <div class="btn btn-primary follow-cursor float-right">
-
-        <font-awesome-icon class="i-cursor" @click="toggleFollowCursor()" icon="i-cursor" />
-
-      </div>
-
-    </div>
+  </div>
 
   </div>
 
@@ -213,7 +242,10 @@ import noteField from './noteField.vue'
 import selectionBox from './selectionBox.vue'
 
 import Tone from 'tone'
-import SelectionBox from '../factories/SelectionBox.js'
+
+// Possibility to use https://github.com/entwicklerstube/babel-plugin-root-import
+// Could be formated at ~/factories/etc...
+import SelectionBox from '../../factories/SelectionBox.js'
 let noteRange = 128
 
 let keyNotes = []
@@ -243,7 +275,7 @@ export default {
       var offset = vm.cursor.ticks * tickWidth
 
       if (
-        vm.playing == true &&
+        vm.playing === true &&
         vm.followCursor === true && (
           offset <= vm.$refs.pianoContainer.scrollLeft ||
         offset >= vm.$refs.pianoContainer.scrollLeft + vm.$refs.pianoContainer.offsetWidth)) {
@@ -382,11 +414,57 @@ export default {
     },
     handleScroll: function (e) {
       var dom = this.$refs.keyNoteBar
+      if (this.scrollBuffer !== undefined) {
+        clearTimeout(this.scrollBuffer)
+      }
+
+      this.scrollBuffer = setTimeout(() => {
+        delete this.scrollBuffer
+        this.renderNotesInView()
+      }, 100)
 
       dom.style.left = e.target.scrollLeft + 'px'
     },
-    toggleFolowCursor: function (e) {
-      this.followCursor = !this.followCursor
+    renderNotesInView: function () {
+      this.notesInView = []
+
+      let parentWidth = this.$refs.pianoContainer.offsetWidth
+      let parentHeight = this.$refs.pianoContainer.offsetHeight
+
+      let parentLeft = this.$refs.pianoContainer.scrollLeft
+      let parentTop = this.$refs.pianoContainer.scrollTop
+
+      let innerHeight = this.keyNotes.length * this.keyHeight
+
+      for (var i in this.channel.track.notes) {
+        let note = this.channel.track.notes[i]
+
+        let bottom = parentHeight + parentTop + ((note.midi * this.keyHeight) - innerHeight)
+        let left = note.ticks * this.tickWidth - parentLeft
+        let right = left + note.durationTicks * this.tickWidth
+        let top = parentHeight + parentTop + ((note.midi * this.keyHeight - this.keyHeight) - innerHeight)
+
+        if (
+          top >= 0 - parentWidth &&
+          left >= 0 - parentHeight &&
+          right <= (parentWidth) * 2 &&
+          bottom <= (parentHeight) * 2
+        ) {
+          this.notesInView.push(note)
+          // console.log('In the viewport!')
+        } else {
+          // this.notesInView.push(note)
+          // console.log('Not in the viewport... whomp whomp')
+        }
+      }
+    },
+    toggleFollowCursor: function (e) {
+      console.log('toggling cursor')
+      if (this.followCursor === true) {
+        this.followCursor = false
+      } else {
+        this.followCursor = true
+      }
     },
     keyNoteMousedown: function (e) {
       this.initialKeyHeight = this.keyHeight
@@ -508,6 +586,7 @@ export default {
   data: function () {
     return {
       notes: [],
+      notesInView: [],
 
       selectionBox: new SelectionBox(),
 
@@ -524,6 +603,7 @@ export default {
       durationTicks: 100,
       noteRange: noteRange,
       keyNotes: keyNotes,
+      bufferRenderNote: false,
 
       initialClientX: 0,
       initialClientY: 0,
