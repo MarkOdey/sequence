@@ -1,10 +1,17 @@
 <template>
+<div class="col">
+
     <div class="volume-control">
       <slider-control v-model="volume" :min="-100" :max="0"></slider-control>
-      <div class="volume-meter" :style="{
+      <div class="volume-meter-container">
+        <div class="volume-meter" :style="{
         height:level+'%'
         }"></div>
       </div>
+
+      </div>
+
+</div>
 
 </template>
 
@@ -61,15 +68,23 @@ export default {
 <style>
 
 .volume-control {
-  display: inline-block;
+  height: max-content;
   position:relative;
 }
 .volume-meter {
   position:absolute;
-  bottom:0;
+  bottom:20px;
   height: 100%;
   width:100%;
   background-color:green;
+}
+
+.volume-meter-container {
+  position:absolute;
+  pointer-events: none;
+  top:0;
+  height:100%;
+  width:100%;
 }
 
 </style>

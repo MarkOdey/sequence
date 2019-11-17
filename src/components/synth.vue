@@ -5,7 +5,7 @@
     <div class="row">
 
       <div class="col-12">
-        <knob-control :size=50 :min=0 :max=2 :stepSize=0.001  v-model="attack"></knob-control>
+        <knob-control :size=75 :min=0 :max=2 :stepSize=0.001  v-model="attack"></knob-control>
       </div>
       <div class="col-12">
         <span>Attack</span>
@@ -15,7 +15,7 @@
 
     <div class="row">
       <div class="col-12">
-        <knob-control :size=50 :min=0 :max=2 :stepSize=0.001  v-model="release"></knob-control>
+        <knob-control :size=75 :min=0 :max=2 :stepSize=0.001  v-model="release"></knob-control>
       </div>
       <div class="col-12">
         <span>Release</span>
@@ -24,7 +24,7 @@
 
     <div class="row">
       <div class="col-12">
-        <knob-control :size=50 :min=0 :max=2 :stepSize=0.001  v-model="sustain"></knob-control>
+        <knob-control :size=75 :min=0 :max=2 :stepSize=0.001  v-model="sustain"></knob-control>
       </div>
       <div class="col-12">
         <span>Sustain</span>
@@ -32,7 +32,7 @@
     </div>
     <div class="row">
       <div class="col-12">
-        <knob-control :size=50 :min=0 :max=2 :stepSize=0.001  v-model="decay"></knob-control>
+        <knob-control :size=75 :min=0 :max=2 :stepSize=0.001  v-model="decay"></knob-control>
       </div>
       <div class="col-12">
         <span>Sustain</span>

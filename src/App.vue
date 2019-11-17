@@ -1,6 +1,6 @@
 <template>
   <div id="app">
-    <midiFile file="chopin_nocturneop9nr1.mid" @update='updateMidi'></midiFile>
+    <midiFile file="beat.mid" @update='updateMidi'></midiFile>
     <div v-for="track in tracks" :key="track.id">
       <channel :track="track"></channel>
     </div>

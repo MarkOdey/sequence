@@ -1,8 +1,16 @@
+
+<style>
+
+  .channel {
+    height:50vh;
+  }
+</style>
+
 <template>
   <div class="container-fluid">
-    <div class="row flex-row flex-nowrap">
+    <div class="row flex-row flex-nowrap channel">
 
-        <midiOut :updated="updateMidi()"/>
+        <midiOut :channel="channel" />
         <midiIn/>
 
         <pianoRoll :channel="channel"></pianoRoll>
