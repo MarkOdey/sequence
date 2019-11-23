@@ -26,6 +26,7 @@ WebMidi.enable(function (err) {
 })
 
 export default {
+  name: 'midiOut',
   props: {
     channel: Object
   },
@@ -62,7 +63,7 @@ export default {
       var output = WebMidi.getOutputById(vm.output.id)
 
       console.log('e')
-      
+
       output.stopNote(e.midi)
     })
   },

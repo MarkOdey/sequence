@@ -150,7 +150,7 @@
             left: keyWidth +'px'
             }" >
 
-            <div class="noteGrid" :style="{
+            <div ref='noteGrid' class="noteGrid" :style="{
                 height: keyHeight*keyNotes.length+'px',
                 width:(tickWidth*channel.track.durationTicks +keyWidth)+'px'
               }">
@@ -375,14 +375,14 @@ export default {
         // Resetting state.
         this.doubleClickedInvoked = false
 
-        var x = event.clientX
-        var y = event.clientY
+        var x = event.pageX
+        var y = event.pageY
 
         // If the event is fired from a mobile device
         if (event.touches !== undefined && event.touches.length === 1) {
           const touch = event.targetTouches.item(0)
-          x = touch.clientX
-          y = touch.clientY
+          x = touch.pageX
+          y = touch.pageY
         }
 
         var parent = event.target.parentElement
@@ -468,13 +468,13 @@ export default {
     },
     keyNoteMousedown: function (e) {
       this.initialKeyHeight = this.keyHeight
-      this.initialOffsetY = e.clientY
+      this.initialOffsetY = e.pageY
       console.log('mouse height')
       window.document.addEventListener('mousemove', this.keyNoteMousemove)
       window.document.addEventListener('mouseup', this.keyNoteMouseup)
     },
     keyNoteMousemove: function (e) {
-      var distance = this.initialOffsetY - e.clientY
+      var distance = this.initialOffsetY - e.pageY
 
       console.log('whhhuuu')
 
@@ -511,8 +511,17 @@ export default {
       } else {
         /* No key is down */
 
-        this.initialClientX = event.clientX
-        this.initialClientY = event.clientY
+        this.initialClientX = event.pageX
+        this.initialClientY = event.pageY
+
+        // If the event is fired from a mobile device
+        if (event.touches !== undefined && event.touches.length === 1) {
+          const touch = event.targetTouches.item(0)
+
+          this.initialClientX = touch.pageX
+          this.initialClientY = touch.pageY
+        }
+
         // Let Check if the note is already selected.
         if (note.selected === true) {
           var selectedNotes = this.channel.track.getSelected()
@@ -527,20 +536,20 @@ export default {
       }
     },
     noteMove: function (event, note) {
-      var x = event.clientX
-      var y = event.clientY
+      var x = event.pageX
+      var y = event.pageY
 
       // If the event is fired from a mobile device
       if (event.touches !== undefined && event.touches.length === 1) {
         const touch = event.targetTouches.item(0)
-        x = touch.clientX
-        y = touch.clientY
+        x = touch.pageX
+        y = touch.pageY
       }
 
       x -= this.initialClientX
       y -= this.initialClientY
 
-      var parent = event.target.parentElement
+      var parent = this.$refs['noteGrid']
       var bounds = parent.getBoundingClientRect()
 
       var selectedNotes = this.channel.track.getSelected()
@@ -548,11 +557,13 @@ export default {
       for (var i in selectedNotes) {
         var selectedNote = selectedNotes[i]
 
-        console.log(selectedNote)
+        // console.log(selectedNote)
 
         if (selectedNote.initialClientX === undefined || selectedNote.initialClientY === undefined) {
           continue
         }
+
+        console.log(bounds.left, bounds.top)
         var noteX = (x - bounds.left) + (selectedNote.initialClientX)
         var noteY = (y - bounds.top) + (selectedNote.initialClientY)
 

@@ -1,6 +1,7 @@
 <template >
+
     <div
-      :class="{'selected' : selected}" @mousedown="mousedown" @touchstart="touchstart"
+      :class="{'selected' : selected}"
       :style="{
         'bottom':data.midi*keyHeight+'px',
         'left':data.ticks*tickWidth+'px',
@@ -10,13 +11,22 @@
 
       }"
 
-    >{{data.midi | toNote}}</div>
+    >
+      <div class="selectArea" @mousedown="mousedown" @touchstart="touchstart"></div>
+
+      {{data.midi | toNote}}
+      <handle-right :note='data' ref="handleLeft"></handle-right>
+      <handle-left :note='data' ref="handleRight" ></handle-left>
+
+    </div>
 </template>
 
 <script>
 
 import Tone from 'tone'
 import Note from '../../factories/Note.js'
+import handleLeft from './note/handleLeft.vue'
+import handleRight from './note/handleRight.vue'
 
 export default {
   name: 'note',
@@ -25,7 +35,6 @@ export default {
     this.data.removeListener('deselected', this.onDeselected)
   },
   mounted: function () {
-    let self = this
     if (this.data === undefined) {
       return
     }
@@ -54,21 +63,10 @@ export default {
     },
     touchmove: function (event) {
       this.$emit('move', event)
-      if (event.touches.length === 1) {
-        const touch = event.targetTouches.item(0)
-        const offsetX = touch.clientX
-        const offsetY = touch.clientY
-        this.move(offsetX, offsetY)
-      }
     },
     touchend: function (event) {
       this.$emit('up', event)
-      if (event.touches.length === 1) {
-        const touch = event.targetTouches.item(0)
-        const offsetX = touch.clientX
-        const offsetY = touch.clientY
-        this.move(offsetX, offsetY)
-      }
+
       window.document.removeEventListener('touchend', this.touchend)
       window.document.removeEventListener('touchmove', this.touchmove)
     },
@@ -102,9 +100,13 @@ export default {
     }
   },
   props: {
-    data: Object,
+    data: Note,
     keyHeight: Number,
     tickWidth: Number
+  },
+  components: {
+    handleLeft,
+    handleRight
   }
 
 }
@@ -129,6 +131,14 @@ export default {
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis // This is where the magic happens
+}
+
+.selectArea {
+  width:100%;
+  height:100%;
+  position:absolute;
+  top:0;
+  left:0;
 }
 
 </style>

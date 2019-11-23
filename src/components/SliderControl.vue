@@ -103,7 +103,7 @@ export default {
 
       this.updatePosition(e.clientX, e.clientY)
 
-      console.log(element)
+      // console.log(element)
     },
     mouseUp: function (e) {
       window.document.removeEventListener('mousemove', this.mouseMove)
