@@ -42,14 +42,14 @@ class Note {
     }
 
     this.select = function () {
-      console.log('firing select state.')
+      // console.log('firing select state.')
 
       self.selected = true
       self.emit('selected', self)
     }
 
     this.deselect = function () {
-      console.log('firing deselect state')
+      // console.log('firing deselect state')
       self.selected = false
       self.emit('deselected', self)
     }

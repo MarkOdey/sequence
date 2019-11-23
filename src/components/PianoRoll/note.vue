@@ -39,10 +39,10 @@ export default {
     onSelected: function () {
       console.log('SELECTED!!!!!!!!!!!!!!!!!!!!!11')
 
-      self.selected = true
+      this.selected = true
     },
     onDeselected: function () {
-      self.selected = false
+      this.selected = false
     },
     touchstart: function (event) {
       console.log('at touch start')
