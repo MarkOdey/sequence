@@ -532,6 +532,7 @@ export default {
         } else {
           this.channel.track.deselectAll()
           note.select()
+          note.startDrag()
         }
       }
     },

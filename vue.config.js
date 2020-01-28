@@ -3,5 +3,5 @@ module.exports = {
     config.resolve.symlinks(false)
   },
 
-  productionSourceMap: false
+  productionSourceMap: true
 }

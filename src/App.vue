@@ -1,5 +1,6 @@
 <template>
   <div id="app">
+
     <midiFile file="beat.mid" @update='updateMidi'></midiFile>
     <div v-for="track in tracks" :key="track.id">
       <channel :track="track"></channel>
@@ -40,6 +41,10 @@ export default {
       }
     }
   },
+  components: {
+    channel,
+    midiFile
+  },
   data: function () {
     return {
       tracks: [],
@@ -61,15 +66,9 @@ export default {
       Tone.Transport.loopEnd = midi.durationTicks + 'i'
       Tone.Transport.loop = true
 
-      console.log(midi)
-
       // vm.durationTicks = track.durationTicks
     }
 
-  },
-  components: {
-    channel,
-    midiFile
   }
 }
 </script>

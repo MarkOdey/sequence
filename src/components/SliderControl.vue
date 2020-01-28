@@ -93,14 +93,10 @@ export default {
   methods: {
 
     mouseDown: function (e) {
-      console.log('on change click')
-
       window.document.addEventListener('mousemove', this.mouseMove)
       window.document.addEventListener('mouseup', this.mouseUp)
     },
     mouseMove: function (e) {
-      var element = this.$el.querySelector('.slider-container')
-
       this.updatePosition(e.clientX, e.clientY)
 
       // console.log(element)
@@ -126,7 +122,7 @@ export default {
       // Rounding value to step size
 
       let stepChunks = this.stepSize.toString().split('.')
-      let decimalSize = stepChunks[1] != undefined ? stepChunks[1].length : 0
+      let decimalSize = stepChunks[1] !== undefined ? stepChunks[1].length : 0
       // let numberSize = stepChunks[0] != undefined ?  stepChunks[0].length : 0;
 
       // Setting magnitude on base 10 for rounding. (10, 100, 1000) etc.

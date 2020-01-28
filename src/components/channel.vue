@@ -19,6 +19,8 @@
 
         <mixer :channel="channel"></mixer>
 
+        <audioInput :channel="channel"></audioInput>
+
     </div>
 
   </div>
@@ -31,6 +33,7 @@ import midiOut from './midiOut.vue'
 import midiIn from './midiIn.vue'
 import pianoRoll from './PianoRoll/pianoRoll.vue'
 import mixer from './mixer.vue'
+import audioInput from './audioInput.vue'
 
 import Channel from '../factories/Channel.js'
 
@@ -38,6 +41,7 @@ import synth from './synth.vue'
 
 export default {
   components: {
+    audioInput,
     midiOut,
     synth,
     midiIn,

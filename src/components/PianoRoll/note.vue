@@ -77,7 +77,7 @@ export default {
       window.document.addEventListener('mouseup', this.mouseup)
     },
     mouseup: function (event) {
-      this.$emit('down', event, this.data)
+      this.$emit('up', event, this.data)
 
       window.document.removeEventListener('mousemove', this.mousemove)
       window.document.removeEventListener('mouseup', this.mouseup)
