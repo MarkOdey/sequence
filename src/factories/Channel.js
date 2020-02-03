@@ -49,6 +49,38 @@ class Channel {
       this.emit('pause', payload)
     }
 
+    this.mute = () => {
+      this.audio.mute = true
+      this.emit('mute')
+    }
+
+    this.unmute = () => {
+      this.audio.mute = false
+      this.emit('unmute')
+    }
+
+    this.record = () => {
+      const audio = document.querySelector('audio')
+
+      const actx = Tone.context
+      const dest = actx.createMediaStreamDestination()
+      const recorder = new MediaRecorder(dest.stream)
+
+      this.audio.connect(dest)
+
+      const chunks = []
+
+      recorder.ondataavailable = evt => chunks.push(evt.data)
+      recorder.onstop = evt => {
+        let blob = new Blob(chunks, { type: 'audio/ogg; codecs=opus' })
+        audio.src = URL.createObjectURL(blob)
+
+        window.webkitRequestFileSystem(window.PERSISTENT, 1024 * 1024, function (store) {
+          console.log(store)
+        })
+      }
+    }
+
     // Added Channels in the global reference.
     Channel.Channels.push(this)
   }

@@ -217,7 +217,7 @@
               <font-awesome-icon class="i-cursor" icon="i-cursor" />
             </div>
 
-            <div class="btn btn-outline-secondary">
+            <div @click="toggleEditMode()"  class="btn btn-outline-secondary">
               <font-awesome-icon class="edit"  icon="edit" />
             </div>
 
@@ -279,8 +279,6 @@ export default {
         vm.followCursor === true && (
           offset <= vm.$refs.pianoContainer.scrollLeft ||
         offset >= vm.$refs.pianoContainer.scrollLeft + vm.$refs.pianoContainer.offsetWidth)) {
-        console.log(vm.$refs.pianoContainer.offsetWidth)
-
         vm.$refs.pianoContainer.scrollLeft = offset - 20
 
         // Updating keybar to be at the right position
@@ -385,7 +383,7 @@ export default {
           y = touch.pageY
         }
 
-        var parent = event.target.parentElement
+        var parent = this.$refs['noteGrid']
         var bounds = parent.getBoundingClientRect()
 
         var noteX = (x - bounds.left)
@@ -394,16 +392,19 @@ export default {
         var ticks = Math.round(noteX / this.tickWidth)
         var midi = Math.floor((bounds.height - noteY) / this.keyHeight)
 
-        self.channel.track.addNote({ 'midi': midi, 'ticks': ticks, 'durationTicks': self.rate })
+        console.log('adding note.', midi, ticks)
 
+        this.channel.track.addNote({ 'midi': midi, 'ticks': ticks, 'durationTicks': self.rate })
+
+        this.renderNotesInView()
         // console.log(this)
       }
 
-      if (self.channel.track.selected === undefined) {
-        self.channel.track.deselectAll()
+      if (this.channel.track.selected === undefined) {
+        this.channel.track.deselectAll()
       }
 
-      self.selectionBox.activate(event)
+      this.selectionBox.activate(event)
     },
     play: function (e) {
       console.log('starting')
@@ -464,6 +465,13 @@ export default {
         this.followCursor = false
       } else {
         this.followCursor = true
+      }
+    },
+    toggleEditMode: function (e) {
+      if (this.editMode === true) {
+        this.editMode = false
+      } else {
+        this.editMode = true
       }
     },
     keyNoteMousedown: function (e) {
@@ -564,7 +572,7 @@ export default {
           continue
         }
 
-        console.log(bounds.left, bounds.top)
+        // console.log(bounds.left, bounds.top)
         var noteX = (x - bounds.left) + (selectedNote.initialClientX)
         var noteY = (y - bounds.top) + (selectedNote.initialClientY)
 
@@ -611,6 +619,8 @@ export default {
 
       focused: false,
       playing: false,
+
+      editMode: true, // Will allow to edit the current notes on the set. If not will create a new note.
 
       durationTicks: 100,
       noteRange: noteRange,

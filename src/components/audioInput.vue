@@ -11,9 +11,6 @@
             </b-dropdown-item>
         </b-dropdown>
 
-        <i class="fas fa-volume-mute"></i>
-        <i class="fas fa-volume-unmute"></i>
-
   </div>
     </div>
 </template>
@@ -27,6 +24,13 @@ export default {
     'channel': Object
   },
   methods: {
+
+    'mute': function () {
+
+    },
+    'unmute': function () {
+
+    },
     'selectInput': function (o) {
       let self = this
       console.log(o)
