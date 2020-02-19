@@ -31,41 +31,41 @@ import Tone from 'tone'
 
 let signature = Tone.Time()
 export default {
-  props: {
-    'value': String
-  },
-  methods: {
-    updateNotation: function (e) {
-      console.log('signature updated')
-      signature = Tone.Time(e.target.value)
+    props: {
+        'value': String
+    },
+    methods: {
+        updateNotation: function (e) {
+            console.log('signature updated')
+            signature = Tone.Time(e.target.value)
 
-      // This not relevant. Only inject notation on setup.
-      // this.notation = signature.toNotation()
+            // This not relevant. Only inject notation on setup.
+            // this.notation = signature.toNotation()
+        },
+        toTicks: function () {
+            return signature.toTicks()
+        },
+        toSeconds: function () {
+            return signature.toSeconds()
+        },
+        toNotation: function () {
+            return signature.toNotation()
+        },
+        toBarsBeatsSixteenths: function () {
+            return signature.toBarsBeatsSixteenths()
+        }
     },
-    toTicks: function () {
-      return signature.toTicks()
+    watch: {
+        value: function () {
+            signature = Tone.Time(this.value)
+            this.notation = signature.toNotation()
+        }
     },
-    toSeconds: function () {
-      return signature.toSeconds()
-    },
-    toNotation: function () {
-      return signature.toNotation()
-    },
-    toBarsBeatsSixteenths: function () {
-      return signature.toBarsBeatsSixteenths()
+    data: function () {
+        return {
+            'notation': 0
+        }
     }
-  },
-  watch: {
-    value: function () {
-      signature = Tone.Time(this.value)
-      this.notation = signature.toNotation()
-    }
-  },
-  data: function () {
-    return {
-      'notation': 0
-    }
-  }
 
 }
 </script>

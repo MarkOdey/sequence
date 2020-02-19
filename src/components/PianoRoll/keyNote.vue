@@ -17,28 +17,29 @@ import Tone from 'tone'
 
 export default {
 
-  name: 'keyNote',
-  data: function () {
-    return {
+    name: 'keyNote',
+    data: function () {
+        return {
 
-    }
-  },
-  props: {
-    value: Number,
-    keyHeight: Number
+        }
+    },
+    props: {
+        value: Number,
+        keyHeight: Number
 
-  },
-  methods: {
-    isSharp: function (midi) {
-      return Tone.Midi(midi).toNote().indexOf('#') !== -1
+    },
+    methods: {
+        isSharp: function (midi) {
+            return Tone.Midi(midi).toNote().indexOf('#') !== -1
+        }
+
+    },
+    filters: {
+        toNote: function (midi) {
+            // console.log(midi)
+            return Tone.Midi(midi).toNote()
+        }
     }
-  },
-  filters: {
-    toNote: function (midi) {
-      // console.log(midi)
-      return Tone.Midi(midi).toNote()
-    }
-  }
 
 }
 </script>

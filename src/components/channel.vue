@@ -40,50 +40,50 @@ import Channel from '../factories/Channel.js'
 import synth from './synth.vue'
 
 export default {
-  components: {
-    audioInput,
-    midiOut,
-    synth,
-    midiIn,
-    pianoRoll,
-    mixer
-  },
-  watch: {
+    components: {
+        audioInput,
+        midiOut,
+        synth,
+        midiIn,
+        pianoRoll,
+        mixer
+    },
+    watch: {
 
-  },
-  beforeMount: function (e) {
+    },
+    beforeMount: function (e) {
 
-  },
-  data: function (e) {
+    },
+    data: function (e) {
     // console.log(this.track)
 
-    let channel = new Channel()
+        let channel = new Channel()
 
-    // console.log(channel)
+        // console.log(channel)
 
-    if (this.track !== undefined) {
-      channel.updateTrack(this.track)
+        if (this.track !== undefined) {
+            channel.updateTrack(this.track)
+        }
+
+        channel.on('updated', function (e) {
+            this.track = channel.track
+            // console.log(this.track)
+        })
+
+        // console.log(channel)
+        return {
+            channel: channel
+        }
+    },
+    props: {
+        track: Object
+    },
+    methods: {
+        updateMidi: function (e) {
+            // console.log(e)
+        }
+
     }
-
-    channel.on('updated', function (e) {
-      this.track = channel.track
-      // console.log(this.track)
-    })
-
-    // console.log(channel)
-    return {
-      channel: channel
-    }
-  },
-  props: {
-    track: Object
-  },
-  methods: {
-    updateMidi: function (e) {
-      // console.log(e)
-    }
-
-  }
 }
 </script>
 

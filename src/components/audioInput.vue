@@ -20,77 +20,77 @@
 import Tone from 'tone'
 
 export default {
-  props: {
-    'channel': Object
-  },
-  methods: {
-
-    'mute': function () {
-
+    props: {
+        'channel': Object
     },
-    'unmute': function () {
+    methods: {
 
-    },
-    'selectInput': function (o) {
-      let self = this
-      console.log(o)
+        'mute': function () {
 
-      // https://stackoverflow.com/questions/58676929/how-to-connect-web-audio-api-to-tone-js
+        },
+        'unmute': function () {
 
-      if (self.media === undefined) {
-        self.media = new Tone.UserMedia()
-      } else {
-        self.media.close()
-      }
+        },
+        'selectInput': function (o) {
+            let self = this
+            console.log(o)
 
-      self.media.open(o.deviceId).then(input => {
-        self.input = input
+            // https://stackoverflow.com/questions/58676929/how-to-connect-web-audio-api-to-tone-js
 
-        if (self.channel !== undefined && self.channel.audio !== undefined) {
-          console.log(self.channel.audio)
+            if (self.media === undefined) {
+                self.media = new Tone.UserMedia()
+            } else {
+                self.media.close()
+            }
 
-          self.input.connect(self.channel.audio)
+            self.media.open(o.deviceId).then(input => {
+                self.input = input
+
+                if (self.channel !== undefined && self.channel.audio !== undefined) {
+                    console.log(self.channel.audio)
+
+                    self.input.connect(self.channel.audio)
+                }
+            })
         }
-      })
+
+    },
+    data: function () {
+        return {
+
+            input: Object,
+            inputs: []
+        }
+    },
+    mounted: function () {
+        navigator.mediaDevices.enumerateDevices().then(payload => {
+            console.log(payload)
+            // this.input = payload[0]
+
+            self.media = new Tone.UserMedia()
+
+            self.media.open(payload[0]).then(input => {
+                self.input = input
+            })
+
+            this.inputs = payload
+        })
+
+        console.log(this)
+
+        navigator.getUserMedia({ audio: true }, function (stream) {
+
+            // audio.connect(this.channel.audio)
+
+            // Create an AudioNode from the stream.
+            // var mediaStreamSource = audioContext.createMediaStreamSource(stream)
+
+            // Connect it to the destination to hear yourself (or any other node for processing!)
+            // mediaStreamSource.connect(audioContext.destination)
+        }, function () {
+
+        })
     }
-
-  },
-  data: function () {
-    return {
-
-      input: Object,
-      inputs: []
-    }
-  },
-  mounted: function () {
-    navigator.mediaDevices.enumerateDevices().then(payload => {
-      console.log(payload)
-      // this.input = payload[0]
-
-      self.media = new Tone.UserMedia()
-
-      self.media.open(payload[0]).then(input => {
-        self.input = input
-      })
-
-      this.inputs = payload
-    })
-
-    console.log(this)
-
-    navigator.getUserMedia({ audio: true }, function (stream) {
-
-      // audio.connect(this.channel.audio)
-
-      // Create an AudioNode from the stream.
-      // var mediaStreamSource = audioContext.createMediaStreamSource(stream)
-
-      // Connect it to the destination to hear yourself (or any other node for processing!)
-      // mediaStreamSource.connect(audioContext.destination)
-    }, function () {
-
-    })
-  }
 
 }
 </script>

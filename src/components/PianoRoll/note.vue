@@ -29,85 +29,85 @@ import handleLeft from './note/handleLeft.vue'
 import handleRight from './note/handleRight.vue'
 
 export default {
-  name: 'note',
-  beforeDestroy: function () {
-    this.data.removeListener('selected', this.onSelected)
-    this.data.removeListener('deselected', this.onDeselected)
-  },
-  mounted: function () {
-    if (this.data === undefined) {
-      return
+    name: 'note',
+    beforeDestroy: function () {
+        this.data.removeListener('selected', this.onSelected)
+        this.data.removeListener('deselected', this.onDeselected)
+    },
+    mounted: function () {
+        if (this.data === undefined) {
+            return
+        }
+        this.data.setElement(this.$el)
+
+        this.data.on('selected', this.onSelected)
+        this.data.on('deselected', this.onDeselected)
+    },
+
+    methods: {
+        onSelected: function () {
+            console.log('SELECTED!!!!!!!!!!!!!!!!!!!!!11')
+
+            this.selected = true
+        },
+        onDeselected: function () {
+            this.selected = false
+        },
+        touchstart: function (event) {
+            console.log('at touch start')
+            // Emitting the selected state.
+            this.$emit('down', event)
+
+            window.document.addEventListener('touchend', this.touchend)
+            window.document.addEventListener('touchmove', this.touchmove)
+        },
+        touchmove: function (event) {
+            this.$emit('move', event)
+        },
+        touchend: function (event) {
+            this.$emit('up', event)
+
+            window.document.removeEventListener('touchend', this.touchend)
+            window.document.removeEventListener('touchmove', this.touchmove)
+        },
+        mousedown: function (event) {
+            this.$emit('down', event, this.data)
+
+            window.document.addEventListener('mousemove', this.mousemove)
+            window.document.addEventListener('mouseup', this.mouseup)
+        },
+        mouseup: function (event) {
+            this.$emit('up', event, this.data)
+
+            window.document.removeEventListener('mousemove', this.mousemove)
+            window.document.removeEventListener('mouseup', this.mouseup)
+        },
+        mousemove: function (event) {
+            this.$emit('move', event, this.data)
+        }
+
+    },
+    filters: {
+        toNote: function (midi) {
+            // console.log(midi)
+            return Tone.Midi(midi).toNote()
+        }
+    },
+    data: function () {
+        return {
+            selected: false
+
+        }
+    },
+    props: {
+        data: Note,
+        keyHeight: Number,
+        tickWidth: Number
+    },
+    components: {
+        handleLeft,
+        handleRight
     }
-    this.data.setElement(this.$el)
-
-    this.data.on('selected', this.onSelected)
-    this.data.on('deselected', this.onDeselected)
-  },
-
-  methods: {
-    onSelected: function () {
-      console.log('SELECTED!!!!!!!!!!!!!!!!!!!!!11')
-
-      this.selected = true
-    },
-    onDeselected: function () {
-      this.selected = false
-    },
-    touchstart: function (event) {
-      console.log('at touch start')
-      // Emitting the selected state.
-      this.$emit('down', event)
-
-      window.document.addEventListener('touchend', this.touchend)
-      window.document.addEventListener('touchmove', this.touchmove)
-    },
-    touchmove: function (event) {
-      this.$emit('move', event)
-    },
-    touchend: function (event) {
-      this.$emit('up', event)
-
-      window.document.removeEventListener('touchend', this.touchend)
-      window.document.removeEventListener('touchmove', this.touchmove)
-    },
-    mousedown: function (event) {
-      this.$emit('down', event, this.data)
-
-      window.document.addEventListener('mousemove', this.mousemove)
-      window.document.addEventListener('mouseup', this.mouseup)
-    },
-    mouseup: function (event) {
-      this.$emit('up', event, this.data)
-
-      window.document.removeEventListener('mousemove', this.mousemove)
-      window.document.removeEventListener('mouseup', this.mouseup)
-    },
-    mousemove: function (event) {
-      this.$emit('move', event, this.data)
-    }
-
-  },
-  filters: {
-    toNote: function (midi) {
-      // console.log(midi)
-      return Tone.Midi(midi).toNote()
-    }
-  },
-  data: function () {
-    return {
-      selected: false
-
-    }
-  },
-  props: {
-    data: Note,
-    keyHeight: Number,
-    tickWidth: Number
-  },
-  components: {
-    handleLeft,
-    handleRight
-  }
 
 }
 </script>

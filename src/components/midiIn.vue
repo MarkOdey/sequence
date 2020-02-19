@@ -12,22 +12,22 @@ import WebMidi from 'webmidi'
 
 export default {
 
-  data: function () {
-    return {
+    data: function () {
+        return {
 
-      label: '',
-      inputs: []
-    }
-  },
-  mounted () {
+            label: '',
+            inputs: []
+        }
+    },
+    mounted () {
     // console.log('compiled')
 
-    // console.log(WebMidi.inputs)
+        // console.log(WebMidi.inputs)
 
-    this.inputs = WebMidi.inputs
+        this.inputs = WebMidi.inputs
 
-    this.$emit('updated', this.inputs[0])
-  }
+        this.$emit('updated', this.inputs[0])
+    }
 
 }
 </script>

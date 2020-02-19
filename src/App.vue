@@ -1,7 +1,7 @@
 <template>
   <div id="app">
 
-    <midiFile file="beat.mid" @update='updateMidi'></midiFile>
+    <midiFile file="beethoven_fur_elise.mid" @update='updateMidi'></midiFile>
     <div v-for="track in tracks" :key="track.id">
       <channel :track="track"></channel>
     </div>
@@ -19,57 +19,57 @@ import Tone from 'tone'
 
 export default {
 
-  name: 'app',
-  head: {
+    name: 'app',
+    head: {
     // To use "this" in the component, it is necessary to return the object through a function
-    title: function () {
-      return {
-        inner: 'Title'
-      }
+        title: function () {
+            return {
+                inner: 'Title'
+            }
+        },
+        meta: [
+            { name: 'description', content: 'Sequencer app based on Tonejs', id: 'desc' },
+            { name: 'viewport', content: 'width=device-width, user-scalable=no' }
+        ]
     },
-    meta: [
-      { name: 'description', content: 'Sequencer app based on Tonejs', id: 'desc' },
-      { name: 'viewport', content: 'width=device-width, user-scalable=no' }
-    ]
-  },
-  css: {
-    loaderOptions: {
-      sass: {
-        data: `
+    css: {
+        loaderOptions: {
+            sass: {
+                data: `
           @import "@/index.scss";
         `
-      }
+            }
+        }
+    },
+    components: {
+        channel,
+        midiFile
+    },
+    data: function () {
+        return {
+            tracks: [],
+            midi: {}
+        }
+    },
+    methods: {
+        updateMidi: function (midi) {
+            console.log('at app level')
+            this.midi = midi
+
+            this.tracks = midi.tracks
+
+            console.log(midi)
+
+            Tone.Transport.PPQ = midi.header.ppq
+            Tone.context.latencyHint = 'fastest'
+            Tone.Transport.loopStart = 0
+            Tone.Transport.loopEnd = midi.durationTicks + 'i'
+            Tone.Transport.loop = true
+
+            // vm.durationTicks = track.durationTicks
+        }
+
     }
-  },
-  components: {
-    channel,
-    midiFile
-  },
-  data: function () {
-    return {
-      tracks: [],
-      midi: {}
-    }
-  },
-  methods: {
-    updateMidi: function (midi) {
-      console.log('at app level')
-      this.midi = midi
-
-      this.tracks = midi.tracks
-
-      console.log(midi)
-
-      Tone.Transport.PPQ = midi.header.ppq
-      Tone.context.latencyHint = 'fastest'
-      Tone.Transport.loopStart = 0
-      Tone.Transport.loopEnd = midi.durationTicks + 'i'
-      Tone.Transport.loop = true
-
-      // vm.durationTicks = track.durationTicks
-    }
-
-  }
 }
 </script>
 

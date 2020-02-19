@@ -36,74 +36,74 @@ import Tone from 'tone'
 import { setInterval } from 'timers'
 
 export default {
-  name: 'mixer',
-  props: {
-    channel: Object
+    name: 'mixer',
+    props: {
+        channel: Object
 
-  },
-  watch: {
-    channel: function (payload) {
-      console.log(payload)
-      if (payload !== undefined) {
-
-      }
     },
-    volume: function (payload) {
-      this.channel.audio.set('volume', payload)
+    watch: {
+        channel: function (payload) {
+            console.log(payload)
+            if (payload !== undefined) {
+
+            }
+        },
+        volume: function (payload) {
+            this.channel.audio.set('volume', payload)
+        }
+    },
+    components: {
+        SliderControl
+    },
+    beforeMount: function () {
+        var self = this
+        this.channel.audio.connect(this.meter)
+
+        this.channel.on('mute', () => {
+            this.muted = true
+
+            console.log('muted changed.')
+        })
+
+        this.channel.on('unmute', () => {
+            this.muted = false
+            console.log('unmuted.')
+        })
+
+        setInterval(function () {
+            let level = self.meter.getLevel()
+
+            // provides the offset between 100db
+            self.level = level + 100
+        }, 50)
+    },
+    methods: {
+        mute: function () {
+            this.channel.mute()
+            this.muted = true
+        },
+        unmute: function () {
+            this.channel.unmute()
+            this.muted = false
+        },
+        record: function () {
+
+        },
+        stopRecord: function () {
+
+        }
+    },
+    data: function () {
+        var meter = new Tone.Meter(0.1)
+
+        return {
+            volume: 0,
+            muted: true,
+            meter: meter,
+            level: 0,
+            recording: false
+        }
     }
-  },
-  components: {
-    SliderControl
-  },
-  beforeMount: function () {
-    var self = this
-    this.channel.audio.connect(this.meter)
-
-    this.channel.on('mute', () => {
-      this.muted = true
-
-      console.log('muted changed.')
-    })
-
-    this.channel.on('unmute', () => {
-      this.muted = false
-      console.log('unmuted.')
-    })
-
-    setInterval(function () {
-      let level = self.meter.getLevel()
-
-      // provides the offset between 100db
-      self.level = level + 100
-    }, 50)
-  },
-  methods: {
-    mute: function () {
-      this.channel.mute()
-      this.muted = true
-    },
-    unmute: function () {
-      this.channel.unmute()
-      this.muted = false
-    },
-    record: function () {
-
-    },
-    stopRecord: function () {
-
-    }
-  },
-  data: function () {
-    var meter = new Tone.Meter(0.1)
-
-    return {
-      volume: 0,
-      muted: true,
-      meter: meter,
-      level: 0,
-      recording: false
-    }
-  }
 }
 
 </script>
