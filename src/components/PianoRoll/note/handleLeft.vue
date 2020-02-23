@@ -7,7 +7,7 @@ export default {
     name: 'handleLeft',
     methods: {
         'startDrag': function (e) {
-            console.log('start drag', e)
+            // console.log('start drag', e)
             var x = event.pageX
             var y = event.pageY
 
@@ -30,7 +30,7 @@ export default {
             }
         },
         'dragUpdate': function (e) {
-            console.log('start drag', e)
+            // console.log('start drag', e)
             var x = event.pageX
 
             // If the event is fired from a mobile device
@@ -39,20 +39,20 @@ export default {
                 x = touch.pageX
             }
 
-            console.log(this.note)
+            // console.log(this.note)
 
             var tickWidth = this.$parent.tickWidth
 
             var tickOffsetX = (x - this.initialPageX) / tickWidth
 
-            console.log(tickOffsetX)
+            // console.log(tickOffsetX)
 
             this.note.update({ 'ticks': tickOffsetX + this.initialTicks, 'durationTicks': this.initialDurationTicks - tickOffsetX })
 
             // this.note.update({ ticks: ticks })
         },
         'dragEnd': function (e) {
-            console.log('remove dragUpdate')
+            // console.log('remove dragUpdate')
             window.document.removeEventListener('mousemove', this.dragUpdate)
             window.document.removeEventListener('mouseup', this.dragEnd)
         }

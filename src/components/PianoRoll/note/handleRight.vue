@@ -43,7 +43,7 @@ export default {
             this.note.update({ 'durationTicks': this.initialDurationTicks + tickOffsetX })
         },
         'dragEnd': function (e) {
-            console.log('remove dragUpdate')
+            // console.log('remove dragUpdate')
             window.document.removeEventListener('mousemove', this.dragUpdate)
             window.document.removeEventListener('mouseup', this.dragEnd)
         }

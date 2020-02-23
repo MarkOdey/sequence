@@ -14,9 +14,9 @@ export default {
     watch: {
         file: function (val) {
             var vm = this
-            console.log(vm.val)
+            // console.log(vm.val)
             Midi.fromUrl(vm.val).then(function (midi) {
-                console.log(midi)
+                // console.log(midi)
                 vm.midi = midi
                 vm.$emit('update', midi)
             })
@@ -27,13 +27,13 @@ export default {
             midi: {}
         }
     },
-    beforeMount: function () {
+    mounted: function () {
         var vm = this
-        console.log(this.file)
-        Midi.fromUrl(vm.file).then(function (midi) {
-            console.log(midi)
-            vm.midi = midi
-            vm.$emit('update', midi)
+        // console.log(this.file)
+        Midi.fromUrl(vm.file).then((midi) => {
+            // console.log(midi)
+            this.midi = midi
+            this.$emit('update', midi)
         })
     }
 

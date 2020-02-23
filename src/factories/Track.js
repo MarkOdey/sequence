@@ -10,6 +10,11 @@ class Track {
         var self = this
         this.notes = []
 
+        // Warning these elements are keyed by midi X ticks to ensure its unicity.
+        this.noteOnEvents = {}
+        this.noteOffEvents = {}
+        this.noteUpdatedEvents = {}
+
         // Creating an audio node.
 
         this.duration = 0
@@ -21,11 +26,11 @@ class Track {
 
         this.getNotesBetween = function (start, end, keyStart, keyEnd) {
             var notes = []
-            // console.log(start, end)
+            // //console.log(start, end)
             for (var i in this.notes) {
                 var note = this.notes[i]
 
-                // console.log(keyStart, keyEnd, note.midi)
+                // //console.log(keyStart, keyEnd, note.midi)
                 if (start < note.ticks && end > note.ticks &&
           keyStart < note.midi && keyEnd > note.midi) {
                     notes.push(note)
@@ -36,22 +41,48 @@ class Track {
         }
 
         this.addNote = function (payload) {
+            // Setting the channel reference to each notes.
+            if (this.channel !== undefined) {
+                payload.channel = this.channel
+            }
             var note = new Note(payload)
             this.notes.push(note)
             this.emit('noteAdded', note)
 
-            note.on('updated', function (note) {
+            const noteOnEvent = function (note) {
+                self.emit('noteOn', note)
+            }
+
+            const noteOffEvent = function (note) {
+                self.emit('noteOff', note)
+            }
+
+            const noteUpdatedEvent = function (note) {
                 self.emit('noteUpdated', note)
                 self.emit('updated', self)
-            })
+            }
 
-            note.on('noteOn', function (note) {
-                self.emit('noteOn', note)
-            })
+            this.noteOnEvents['m' + note.midi + 't' + note.ticks] = noteOnEvent
+            this.noteOffEvents['m' + note.midi + 't' + note.ticks] = noteOffEvent
+            this.noteUpdatedEvents['m' + note.midi + 't' + note.ticks] = noteUpdatedEvent
+            note.on('updated', noteUpdatedEvent)
 
-            note.on('noteoff', function (note) {
-                self.emit('noteOff', note)
-            })
+            note.on('noteOn', noteOnEvent)
+
+            note.on('noteoff', noteOffEvent)
+        }
+
+        this.removeNote = function (note) {
+            const i = this.notes.indexOf(note)
+            this.notes.splice(i, 1)
+
+            this.emit('noteAdded', note)
+
+            note.removeListener('updated', this.noteUpdatedEvents['m' + note.midi + 't' + note.ticks])
+
+            note.removeListener('noteOn', this.noteOnEvents['m' + note.midi + 't' + note.ticks])
+
+            note.removeListener('noteoff', this.noteOffEvents['m' + note.midi + 't' + note.ticks])
         }
 
         /**
@@ -89,6 +120,9 @@ class Track {
         }
 
         this.update = function (payload) {
+            if (payload.channel !== undefined) {
+                this.channel = payload.channel
+            }
             if (payload.duration !== undefined) {
                 this.duration = payload.duration
             }
@@ -110,9 +144,18 @@ class Track {
                 this.endTick = this.durationTicks
             }
 
-            // Lets loop through each notes to assign an id to it
-            for (var i in payload.notes) {
-                self.addNote(payload.notes[i])
+            if (payload.notes !== undefined) {
+
+                console.log('updating notest')
+
+                for (var note of this.notes) {
+                    this.removeNote(note)
+                }
+
+                // Lets loop through each notes to assign an id to it
+                for (var i in payload.notes) {
+                    this.addNote(payload.notes[i])
+                }
             }
 
             this.emit('updated', this)

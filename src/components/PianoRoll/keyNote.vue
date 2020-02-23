@@ -36,7 +36,7 @@ export default {
     },
     filters: {
         toNote: function (midi) {
-            // console.log(midi)
+            // //console.log(midi)
             return Tone.Midi(midi).toNote()
         }
     }
@@ -55,7 +55,6 @@ export default {
     position:absolute;
     left:0px;
     width:100%;
-    font-size:1.5vh;
 
   }
 

@@ -1,19 +1,22 @@
 <template>
   <div id="app">
 
-    <midiFile file="beethoven_fur_elise.mid" @update='updateMidi'></midiFile>
-    <div v-for="track in tracks" :key="track.id">
-      <channel :track="track"></channel>
+    <topHeader @updateMidi="updateMidi($event)"></topHeader>
+
+    <div v-for="channel in channels" :key="channel.id">
+      <channel :channel="channel"></channel>
     </div>
 
   </div>
 </template>
 
 <script>
-import channel from './components/channel.vue'
-import midiFile from './components/midiFile.vue'
 
-import Tone from 'tone'
+import Project from './factories/Project.js'
+import topHeader from './components/topHeader.vue'
+import channel from './components/channel.vue'
+
+// import Tone from 'tone'
 
 // import VueGridLayout from 'vue-grid-layout'
 
@@ -35,40 +38,36 @@ export default {
     css: {
         loaderOptions: {
             sass: {
-                data: `
-          @import "@/index.scss";
-        `
+                data: `@import "@/index.scss";`
             }
         }
     },
-    components: {
-        channel,
-        midiFile
+    mounted: function () {
+        Project.on('updated', (panel) => {
+
+        })
     },
-    data: function () {
-        return {
-            tracks: [],
-            midi: {}
+    watch: {
+        channels () {
+            // console.log(this.channels)
+
+            // console.log('channel changed.')
         }
     },
     methods: {
-        updateMidi: function (midi) {
-            console.log('at app level')
-            this.midi = midi
-
-            this.tracks = midi.tracks
-
-            console.log(midi)
-
-            Tone.Transport.PPQ = midi.header.ppq
-            Tone.context.latencyHint = 'fastest'
-            Tone.Transport.loopStart = 0
-            Tone.Transport.loopEnd = midi.durationTicks + 'i'
-            Tone.Transport.loop = true
-
-            // vm.durationTicks = track.durationTicks
+        updateMidi: function (payload) {
+            // console.log(payload)
         }
-
+    },
+    components: {
+        topHeader,
+        channel
+    },
+    data: function () {
+        return {
+            channels: Project.channels,
+            midi: {}
+        }
     }
 }
 </script>

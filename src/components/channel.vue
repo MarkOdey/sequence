@@ -2,8 +2,15 @@
 <style>
 
   .channel {
-    height:50vh;
+    height:40vh;
   }
+
+  @media screen and (max-height:800px) {
+    .channel {
+      height: 80vh;
+    }
+  }
+
 </style>
 
 <template>
@@ -13,7 +20,7 @@
         <midiOut :channel="channel" />
         <midiIn/>
 
-        <pianoRoll :channel="channel"></pianoRoll>
+        <pianoRoll :track="channel.track" :channel="channel"></pianoRoll>
 
         <synth :channel="channel"></synth>
 
@@ -35,7 +42,7 @@ import pianoRoll from './PianoRoll/pianoRoll.vue'
 import mixer from './mixer.vue'
 import audioInput from './audioInput.vue'
 
-import Channel from '../factories/Channel.js'
+// import Channel from '../factories/Channel.js'
 
 import synth from './synth.vue'
 
@@ -54,33 +61,24 @@ export default {
     beforeMount: function (e) {
 
     },
-    data: function (e) {
-    // console.log(this.track)
+    mounted: function () {
+        this.channel.on('updated', function (e) {
 
-        let channel = new Channel()
-
-        // console.log(channel)
-
-        if (this.track !== undefined) {
-            channel.updateTrack(this.track)
-        }
-
-        channel.on('updated', function (e) {
-            this.track = channel.track
-            // console.log(this.track)
         })
+    },
+    data: function (e) {
+    // //console.log(this.track)
 
-        // console.log(channel)
+        // //console.log(channel)
         return {
-            channel: channel
         }
     },
     props: {
-        track: Object
+        channel: Object
     },
     methods: {
         updateMidi: function (e) {
-            // console.log(e)
+            // //console.log(e)
         }
 
     }

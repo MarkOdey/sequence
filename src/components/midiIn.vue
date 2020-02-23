@@ -20,9 +20,9 @@ export default {
         }
     },
     mounted () {
-    // console.log('compiled')
+    // //console.log('compiled')
 
-        // console.log(WebMidi.inputs)
+        // //console.log(WebMidi.inputs)
 
         this.inputs = WebMidi.inputs
 

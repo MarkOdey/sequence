@@ -99,7 +99,7 @@ export default {
         mouseMove: function (e) {
             this.updatePosition(e.clientX, e.clientY)
 
-            // console.log(element)
+            // //console.log(element)
         },
         mouseUp: function (e) {
             window.document.removeEventListener('mousemove', this.mouseMove)
@@ -111,13 +111,13 @@ export default {
 
             const boundingClientRect = elementContainer.getBoundingClientRect()
 
-            console.log(boundingClientRect)
+            // console.log(boundingClientRect)
 
             let positionX = -1 * (y - boundingClientRect.bottom)
 
             let value = this.min + (positionX / boundingClientRect.height) * (this.max - this.min)
 
-            console.log(this.internalValue)
+            // console.log(this.internalValue)
 
             // Rounding value to step size
 
@@ -148,7 +148,7 @@ export default {
 
     },
     data: function () {
-        console.log(this.value)
+        // console.log(this.value)
         return {
             internalValue: this.value
         }

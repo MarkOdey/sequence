@@ -17,12 +17,15 @@ class Note {
         this.initialClientY = undefined
 
         var noteOn = function noteOn () {
+            if (this.channel !== undefined && this.channel.playing === false) {
+                return
+            }
             // console.log('note fired')
             self.emit('noteOn', self)
         }
 
         var noteOff = function noteOff () {
-            // console.log('note off')
+            // //console.log('note off')
             self.emit('noteOff', self)
         }
 
@@ -42,19 +45,19 @@ class Note {
         }
 
         this.select = function () {
-            // console.log('firing select state.')
+            // //console.log('firing select state.')
 
             self.selected = true
             self.emit('selected', self)
         }
 
         this.deselect = function () {
-            // console.log('firing deselect state')
+            // //console.log('firing deselect state')
             self.selected = false
             self.emit('deselected', self)
         }
         this.update = function (payload) {
-            // console.log('updating')
+            // //console.log('updating')
             if (payload.ticks !== undefined) {
                 this.ticks = payload.ticks
                 this.time = payload.ticks + 'i'
@@ -76,6 +79,10 @@ class Note {
                 this.midi = payload.midi
             }
 
+            if (payload.channel !== undefined) {
+                this.channel = payload.channel
+            }
+
             if (self.noteOnTimer !== undefined) {
                 Tone.Transport.clear(self.noteOnTimer)
             }
@@ -84,14 +91,17 @@ class Note {
                 Tone.Transport.clear(self.noteOffTimer)
             }
 
-            console.log('scheduling a note')
+            // console.log(this.channel)
+
+            // console.log('scheduling a note')
             if (payload.ticks !== undefined) {
-                self.noteOnTimer = Tone.Transport.schedule(noteOn, this.ticks + 'i')
+                // This is where the note is wrapped around the tonejs transport.
+                this.noteOnTimer = Tone.Transport.schedule(noteOn, this.ticks + 'i')
             }
 
             // Once the noteOn fired we register the noteOff sequence.
             if (payload.durationTicks !== undefined || payload.ticks !== undefined) {
-                self.noteOffTimer = Tone.Transport.schedule(noteOff, this.ticks + this.durationTicks + 'i')
+                this.noteOffTimer = Tone.Transport.schedule(noteOff, this.ticks + this.durationTicks + 'i')
             }
 
             // Lets loop through each notes to assign an id to it

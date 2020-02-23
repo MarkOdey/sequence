@@ -38,28 +38,26 @@ export default {
             this.initialOffsetY = e.pageY
 
             this.initialScrollTop = this.$parent.$refs.pianoContainer.scrollTop
-            console.log('mouse height')
+
             window.document.addEventListener('mousemove', this.keyNoteMousemove)
             window.document.addEventListener('mouseup', this.keyNoteMouseup)
         },
         keyNoteMousemove: function (e) {
             var distance = this.initialOffsetY - e.pageY
 
-            console.log('whhhuuu')
+            let keyHeight = this.keyHeight
 
             if (this.initialKeyHeight + distance > 0.1) {
-                this.keyHeight = this.initialKeyHeight + distance
+                keyHeight = this.initialKeyHeight + distance
             }
 
-            console.log(this.initialScrollTop)
-
-            const magnitude = this.keyHeight / this.initialKeyHeight
+            const magnitude = keyHeight / this.initialKeyHeight
 
             this.$parent.$refs.pianoContainer.scrollTo({ top: this.initialScrollTop * magnitude })
 
-            this.$emit('keyHeightChanged', this.keyHeight)
+            this.$emit('keyHeightChanged', keyHeight)
 
-            // console.log(distance)
+            // //console.log(distance)
         },
 
         keyNoteMouseup: function (e) {

@@ -23,7 +23,7 @@ export default {
     mounted: function () {
         var self = this
         this.data.on('activated', function (event) {
-            // console.log('activated')
+            // //console.log('activated')
             var rect = self.$el.parentElement.getBoundingClientRect()
             var x = event.clientX - rect.left // x position within the element.
             var y = rect.bottom - event.clientY // y position within the element.
@@ -32,7 +32,7 @@ export default {
         })
 
         this.data.on('deactivated', function () {
-            // console.log('deactivated')
+            // //console.log('deactivated')
             self.deactivate()
             self.active = false
         })
@@ -61,7 +61,7 @@ export default {
             window.document.addEventListener('mouseup', this.backgroundMouseUp)
         },
         backgroundMouseMove: function (event) {
-            console.log('move box selection')
+            // //console.log('move box selection')
             // var x = event.clientX - this.x
             // var y = event.clientY - this.y
 
@@ -88,7 +88,7 @@ export default {
             this.resizeBoxSelection(w, h)
         },
         backgroundMouseUp: function (event) {
-            // console.log('this is mouse up time')
+            // //console.log('this is mouse up time')
 
             this.data.deactivate()
             window.document.removeEventListener('mousemove', this.backgroundMouseMove)

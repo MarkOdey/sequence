@@ -46,7 +46,7 @@ export default {
 
     methods: {
         onSelected: function () {
-            console.log('SELECTED!!!!!!!!!!!!!!!!!!!!!11')
+            // console.log('SELECTED!!!!!!!!!!!!!!!!!!!!!11')
 
             this.selected = true
         },
@@ -54,7 +54,7 @@ export default {
             this.selected = false
         },
         touchstart: function (event) {
-            console.log('at touch start')
+            // console.log('at touch start')
             // Emitting the selected state.
             this.$emit('down', event)
 
@@ -89,7 +89,7 @@ export default {
     },
     filters: {
         toNote: function (midi) {
-            // console.log(midi)
+            // //console.log(midi)
             return Tone.Midi(midi).toNote()
         }
     },
@@ -123,7 +123,7 @@ export default {
   background-color:rgba(0,0,0,0.1);
   cursor:grab;
   user-select: none;
-  font-size:1.5vh;
+  font-size:1rem;
 
   touch-action: none;
   border:solid 1px #DDDDDD66;

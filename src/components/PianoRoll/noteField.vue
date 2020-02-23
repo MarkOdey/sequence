@@ -36,7 +36,7 @@ export default {
     },
     methods: {
         updateNotation: function (e) {
-            console.log('signature updated')
+            // console.log('signature updated')
             signature = Tone.Time(e.target.value)
 
             // This not relevant. Only inject notation on setup.

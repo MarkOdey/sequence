@@ -1,5 +1,6 @@
 import Tone from 'tone'
 import Track from './Track.js'
+import Project from './Project.js'
 var EventEmitter = require('events')
 
 Tone.Transport.bpm.value = 120
@@ -8,43 +9,54 @@ var inherits = require('util').inherits
 
 class Channel {
     constructor (payload) {
-        this.track = []
+        this.track = {}
         this.audio = new Tone.Channel()
         this.midiIn = {}
         this.midiOut = {}
 
-        // console.log(payload)
+        this.loop = setInterval(() => {
+            // triggered every eighth note.
+
+            this.tick()
+        }, 200)
+
+        // //console.log(payload)
 
         this.audio.toMaster()
 
         this.playing = true
 
-        Tone.Transport.on('start', function () {
-
-        })
-
         this.id = Math.round(Math.random() * 10000)
 
-        Object.assign(this, payload)
+        // Object.assign(this, payload)
+
+        this.tick = (payload) => {
+            this.emit('tick')
+        }
 
         this.updateTrack = (payload) => {
+            // Adding the channel to the payload.
+            payload.channel = this
             if (this.track !== undefined) {
                 this.track = new Track(payload)
             } else {
                 this.track.update(payload)
             }
+
+            // console.log(this.track)
             this.emit('updated', this)
             this.emit('trackUpdated', this.track)
         }
 
         this.play = (payload) => {
-            Tone.Transport.start('+1')
+            // this.loop.start()
+            // Tone.Transport.start('+1')
             this.playing = true
             this.emit('play', payload)
         }
 
         this.pause = (payload) => {
-            Tone.Transport.pause()
+            // this.loop.stop()
             this.playing = false
             this.emit('pause', payload)
         }
@@ -76,10 +88,24 @@ class Channel {
                 audio.src = URL.createObjectURL(blob)
 
                 window.webkitRequestFileSystem(window.PERSISTENT, 1024 * 1024, function (store) {
-                    console.log(store)
+                    // console.log(store)
                 })
             }
         }
+
+        if (payload !== undefined && payload.track !== undefined) {
+            this.updateTrack(payload.track)
+        }
+
+        Project.on('play', () => {
+            if (this.playing) {
+                this.play()
+            }
+        })
+
+        Project.on('pause', () => {
+
+        })
 
         // Added Channels in the global reference.
         Channel.Channels.push(this)

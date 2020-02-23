@@ -33,13 +33,13 @@ export default {
             markerContainer.style.top = e.target.scrollTop + 'px'
         },
         startMarkerTouch: function (event) {
-            console.log(event)
+            // console.log(event)
 
             window.document.addEventListener('touchmove', this.startMarkerDrag)
             window.document.addEventListener('touchend', this.startMarkerEndDrag)
         },
         startMarkerClick: function (event) {
-            console.log(event)
+            // console.log(event)
 
             window.document.addEventListener('mousemove', this.startMarkerDrag)
             window.document.addEventListener('mouseup', this.startMarkerEndDrag)
@@ -69,7 +69,7 @@ export default {
                 startTick: x / this.$parent.tickWidth
             })
 
-            console.log(x, y)
+            // console.log(x, y)
         },
         startMarkerEndDrag: function (event) {
             window.document.removeEventListener('mousemove', this.startMarkerDrag)
@@ -78,7 +78,7 @@ export default {
             window.document.removeEventListener('touchend', this.startMarkerEndDrag)
         },
         endMarkerClick: function (event) {
-            console.log(event)
+            // console.log(event)
 
             window.document.addEventListener('mousemove', this.endMarkerDrag)
             window.document.addEventListener('mouseup', this.endMarkerEndDrag)
@@ -87,7 +87,7 @@ export default {
 
         },
         endMarkerDrag: function (event) {
-            console.log(event)
+            // console.log(event)
 
             var x = event.pageX
             var y = event.pageY
@@ -112,7 +112,7 @@ export default {
                 endTick: x / this.$parent.tickWidth
             })
 
-            console.log(x, y)
+            // console.log(x, y)
         },
         endMarkerEndDrag: function (event) {
             window.document.removeEventListener('mousemove', this.endMarkerDrag)

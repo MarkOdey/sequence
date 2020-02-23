@@ -68,6 +68,9 @@
     height:100%;
     width:1px;
     background-color:red;
+    transition-property: left;
+    transition-duration: 0.1s;
+
   }
 
   .zoom-control {
@@ -112,7 +115,7 @@
 
             <keyBar :keyHeight="keyHeight" @keyHeightChanged="keyHeightUpdate" ></keyBar>
 
-          <trackMarker :track="channel.track"></trackMarker>
+          <trackMarker :track="track"></trackMarker>
 
           <div  class="noteGridContainer" :style="{
             height: keyHeight*keyNotes.length+'px',
@@ -121,7 +124,7 @@
 
             <div ref='noteGrid' class="noteGrid" :style="{
                 height: keyHeight*keyNotes.length+'px',
-                width:(tickWidth*channel.track.durationTicks +keyWidth)+'px'
+                width:(tickWidth*track.durationTicks +keyWidth)+'px'
               }">
 
               <div  class="grid"
@@ -234,70 +237,28 @@ for (var i = 0; i < noteRange; i++) {
 }
 
 export default {
-    beforeMount: function () {
-        var vm = this
 
-        function animate () {
-            vm.cursor.ticks = Tone.Transport.ticks % vm.channel.track.durationTicks
-            vm.durationTicks = vm.channel.track.durationTicks
+    mounted: function () {
+        this.id = this._uid
 
-            var offset = vm.cursor.ticks * tickWidth
+        this.selectionBox.on('rangeSelected', (event) => {
+            // //console.log(event)
 
-            if (
-                vm.playing === true &&
-        vm.followCursor === true && (
-                    offset <= vm.$refs.pianoContainer.scrollLeft ||
-        offset >= vm.$refs.pianoContainer.scrollLeft + vm.$refs.pianoContainer.offsetWidth)) {
-                vm.$refs.pianoContainer.scrollLeft = offset - 20
+            var ticks = event.x / this.tickWidth
+            var durationTicks = (event.x + event.width) / this.tickWidth
 
-                // Updating keybar to be at the right position
-                var dom = vm.$refs.keyNoteBar
+            var keyStart = (event.y) / this.keyHeight
+            var keyEnd = (event.y + event.height) / this.keyHeight
 
-                dom.style.left = vm.$refs.pianoContainer.scrollLeft + 'px'
-            }
+            var notes = this.track.getNotesBetween(ticks, durationTicks, keyStart, keyEnd)
 
-            window.setTimeout(function () {
-                window.requestAnimationFrame(animate)
-            }, 100)
-        }
-
-        window.requestAnimationFrame(animate)
-
-        // console.log(this.channel.track)
-
-        this.channel.track.on('updated', function (track) {
-            // console.log(track)
-        })
-
-        this.channel.on('play', function () {
-            vm.playing = true
-        })
-
-        this.channel.on('pause', function () {
-            vm.playing = false
-        })
-
-        this.selectionBox.on('rangeSelected', function (event) {
-            // console.log(event)
-
-            var ticks = event.x / vm.tickWidth
-            var durationTicks = (event.x + event.width) / vm.tickWidth
-
-            var keyStart = (event.y) / vm.keyHeight
-            var keyEnd = (event.y + event.height) / vm.keyHeight
-
-            var notes = vm.channel.track.getNotesBetween(ticks, durationTicks, keyStart, keyEnd)
-
-            console.log(notes)
+            // console.log(notes)
 
             for (var i in notes) {
                 notes[i].select()
             }
         })
-    },
 
-    mounted: function () {
-        this.id = this._uid
         this.$refs.pianoContainer.addEventListener('scroll', this.handleScroll)
 
         this.$el.addEventListener('mouseover', function () {
@@ -313,19 +274,32 @@ export default {
         this.$el.addEventListener('touchleave', function () {
             this.focused = false
         })
+
+        // We instantiate listener for the channel.
+        if (this.channel !== undefined) {
+            // console.log('track updated')
+
+            this.updateChannel()
+        }
     },
 
     watch: {
 
         zoom () {
-            console.log(this.zoom)
+            // //console.log(this.zoom)
             this.tickWidth = Number(this.zoom)
+        },
+        channel  () {
+            this.updateChannel()
+        },
+        track () {
+            this.updateTrack()
         }
 
     },
     methods: {
         keyHeightUpdate: function (e) {
-            console.log(e)
+            // //console.log(e)
             this.keyHeight = e
         },
         backgroundMouseDown: function (event) {
@@ -338,7 +312,7 @@ export default {
                 }, 300)
             } else {
                 // Double click event fired.
-                console.log('Tapped twice')
+                // //console.log('Tapped twice')
                 // Resetting state.
                 this.doubleClickedInvoked = false
 
@@ -361,26 +335,33 @@ export default {
                 var ticks = Math.round(noteX / this.tickWidth)
                 var midi = Math.floor((bounds.height - noteY) / this.keyHeight)
 
-                console.log('adding note.', midi, ticks)
+                // //console.log('adding note.', midi, ticks)
 
-                this.channel.track.addNote({ 'midi': midi, 'ticks': ticks, 'durationTicks': self.rate })
+                this.track.addNote({ 'midi': midi, 'ticks': ticks, 'durationTicks': self.rate })
 
                 this.renderNotesInView()
-                // console.log(this)
+                // ////console.log(this)
             }
 
-            if (this.channel.track.selected === undefined) {
-                this.channel.track.deselectAll()
+            if (this.track.selected === undefined) {
+                this.track.deselectAll()
             }
 
             this.selectionBox.activate(event)
         },
         play: function (e) {
-            console.log('starting')
+            // //console.log('starting')
+
             this.channel.play()
+
+            this.playing = this.channel.playing
+            this.$forceUpdate()
         },
         pause: function (e) {
             this.channel.pause()
+
+            this.playing = this.channel.playing
+            this.$forceUpdate()
         },
         handleScroll: function (e) {
             if (this.scrollBuffer !== undefined) {
@@ -391,8 +372,6 @@ export default {
                 delete this.scrollBuffer
                 this.renderNotesInView()
             }, 100)
-
-            console.log('at scroll event')
         },
         renderNotesInView: function () {
             this.notesInView = []
@@ -405,8 +384,8 @@ export default {
 
             let innerHeight = this.keyNotes.length * this.keyHeight
 
-            for (var i in this.channel.track.notes) {
-                let note = this.channel.track.notes[i]
+            for (var i in this.track.notes) {
+                let note = this.track.notes[i]
 
                 let bottom = parentHeight + parentTop + ((note.midi * this.keyHeight) - innerHeight)
                 let left = note.ticks * this.tickWidth - parentLeft
@@ -415,20 +394,20 @@ export default {
 
                 if (
                     top >= 0 - parentWidth &&
-          left >= 0 - parentHeight &&
-          right <= (parentWidth) * 2 &&
-          bottom <= (parentHeight) * 2
+                    left >= 0 - parentHeight &&
+                    right <= (parentWidth) * 2 &&
+                    bottom <= (parentHeight) * 2
                 ) {
                     this.notesInView.push(note)
-                    // console.log('In the viewport!')
+                    // //console.log('In the viewport!')
                 } else {
                     // this.notesInView.push(note)
-                    // console.log('Not in the viewport... whomp whomp')
+                    // //console.log('Not in the viewport... whomp whomp')
                 }
             }
         },
         toggleFollowCursor: function (e) {
-            console.log('toggling cursor')
+            // console.log('toggling cursor')
             if (this.followCursor === true) {
                 this.followCursor = false
             } else {
@@ -474,13 +453,13 @@ export default {
 
                 // Let Check if the note is already selected.
                 if (note.selected === true) {
-                    var selectedNotes = this.channel.track.getSelected()
+                    var selectedNotes = this.track.getSelected()
                     for (var i in selectedNotes) {
                         var selectedNote = selectedNotes[i]
                         selectedNote.startDrag(event)
                     }
                 } else {
-                    this.channel.track.deselectAll()
+                    this.track.deselectAll()
                     note.select()
                     note.startDrag()
                 }
@@ -503,24 +482,24 @@ export default {
             var parent = this.$refs['noteGrid']
             var bounds = parent.getBoundingClientRect()
 
-            var selectedNotes = this.channel.track.getSelected()
+            var selectedNotes = this.track.getSelected()
 
             for (var i in selectedNotes) {
                 var selectedNote = selectedNotes[i]
 
-                // console.log(selectedNote)
+                // //console.log(selectedNote)
 
                 if (selectedNote.initialClientX === undefined || selectedNote.initialClientY === undefined) {
                     continue
                 }
 
-                // console.log(bounds.left, bounds.top)
+                // //console.log(bounds.left, bounds.top)
                 var noteX = (x - bounds.left) + (selectedNote.initialClientX)
                 var noteY = (y - bounds.top) + (selectedNote.initialClientY)
 
                 var ticks = Math.round(noteX / this.tickWidth)
                 var midi = Math.floor((bounds.height - noteY) / this.keyHeight)
-                // console.log(this)
+                // //console.log(this)
 
                 selectedNote.update({ midi: midi, ticks: ticks })
                 // this.$emit('update', { index: this.index, midi: midi, ticks: ticks })
@@ -533,10 +512,65 @@ export default {
 
         },
         noteUpdated: function (payload) {
-            // console.log(payload)
-            // console.log(this.channel.track)
+            // //console.log(payload)
+            // //console.log(this.track)
 
-            // this.channel.track.updateNote(payload)
+            // this.track.updateNote(payload)
+        },
+        updateTrack: function () {
+            this.track.on('updated', function (track) {
+                // console.log('track updated')
+                this.cursor.ticks = Tone.Transport.ticks % this.track.durationTicks
+                this.durationTicks = this.track.durationTicks
+
+                this.$forceUpdate()
+
+                // console.log(this.track)
+
+            // //console.log(track)
+            })
+        },
+        channelTick: function () {
+            // //console.log('animating cursor')
+            this.cursor.ticks = Tone.Transport.ticks % this.track.durationTicks
+            this.durationTicks = this.track.durationTicks
+
+            var offset = this.cursor.ticks * tickWidth
+
+            if (
+                this.playing === true &&
+                this.followCursor === true && (
+                    offset <= this.$refs.pianoContainer.scrollLeft ||
+                    offset >= this.$refs.pianoContainer.scrollLeft + this.$refs.pianoContainer.offsetWidth)) {
+                this.$refs.pianoContainer.scrollLeft = offset - 20
+            }
+            this.$forceUpdate()
+        },
+        channelPlay: function () {
+            this.playing = true
+        },
+        channelPause: function () {
+            this.playing = false
+        },
+        updateChannel: function () {
+            // console.log('channel instantiated in pianoRoll')
+
+            this.cursor.ticks = Tone.Transport.ticks % this.track.durationTicks
+            this.durationTicks = this.track.durationTicks
+
+            if (this.channel === undefined) {
+                return
+            }
+
+            this.channel.removeListener('tick', this.channelTick)
+            this.channel.removeListener('play', this.channelPlay)
+            this.channel.removeListener('pause', this.channelPause)
+
+            this.channel.on('tick', this.channelTick)
+
+            this.channel.on('play', this.channelPlay)
+
+            this.channel.on('pause', this.channelPause)
         }
     },
     computed: {
@@ -581,7 +615,8 @@ export default {
         }
     },
     props: {
-        channel: Object
+        channel: Object,
+        track: Object
     },
     components: {
         note,

@@ -33,7 +33,7 @@ export default {
         },
         'selectInput': function (o) {
             let self = this
-            console.log(o)
+            // console.log(o)
 
             // https://stackoverflow.com/questions/58676929/how-to-connect-web-audio-api-to-tone-js
 
@@ -47,7 +47,7 @@ export default {
                 self.input = input
 
                 if (self.channel !== undefined && self.channel.audio !== undefined) {
-                    console.log(self.channel.audio)
+                    // console.log(self.channel.audio)
 
                     self.input.connect(self.channel.audio)
                 }
@@ -64,7 +64,7 @@ export default {
     },
     mounted: function () {
         navigator.mediaDevices.enumerateDevices().then(payload => {
-            console.log(payload)
+            // console.log(payload)
             // this.input = payload[0]
 
             self.media = new Tone.UserMedia()
@@ -76,7 +76,7 @@ export default {
             this.inputs = payload
         })
 
-        console.log(this)
+        // console.log(this)
 
         navigator.getUserMedia({ audio: true }, function (stream) {
 

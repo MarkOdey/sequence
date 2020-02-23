@@ -51,7 +51,7 @@ export default {
         attack: {
 
             handler: function (val) {
-                console.log(this.attack + 'changed')
+                // console.log(this.attack + 'changed')
 
                 for (var i in this.polySynth.voices) {
                     this.polySynth.voices[i].envelope.attack = val
@@ -63,7 +63,7 @@ export default {
         release: {
 
             handler: function (val) {
-                console.log(this.release + 'changed')
+                // console.log(this.release + 'changed')
 
                 for (var i in this.polySynth.voices) {
                     this.polySynth.voices[i].envelope.release = val
@@ -74,7 +74,7 @@ export default {
         sustain: {
 
             handler: function (val) {
-                console.log(this.sustain + 'changed')
+                // console.log(this.sustain + 'changed')
 
                 for (var i in this.polySynth.voices) {
                     this.polySynth.voices[i].envelope.sustain = val
@@ -85,7 +85,7 @@ export default {
         decay: {
 
             handler: function (val) {
-                console.log(this.decay + 'changed')
+                // console.log(this.decay + 'changed')
 
                 for (var i in this.polySynth.voices) {
                     this.polySynth.voices[i].envelope.decay = val
@@ -96,61 +96,61 @@ export default {
         channel: {
 
             handler: function (payload) {
-                console.log(payload)
+                // console.log(payload)
 
-                self.polySynth.connect(self.channel.audio)
-
-                if (payload.track !== undefined) {
-                    self.updateTrack(payload.track)
-                }
+                this.updateChannel()
             }
         }
 
     },
     methods: {
+        updateChannel: function () {
+            this.polySynth.connect(this.channel.audio)
+
+            if (this.channel.track !== undefined) {
+                this.updateTrack(this.channel.track)
+            }
+
+            this.polySynth.connect(this.channel.audio)
+
+            this.channel.on('play', function () {
+                // this.part.start()
+            })
+            this.channel.on('pause', function () {
+                // this.part.stop()
+            })
+
+            if (this.channel.track !== undefined) {
+                this.channel.track.on('noteOn', (note) => {
+                    // Converting midi note to pitch.
+                    var pitch = Tone.Frequency(note.midi, 'midi').toNote()
+                    // the notes given as the second element in the array
+                    // will be passed in as the second argument
+                    this.polySynth.triggerAttackRelease(pitch, note.durationTicks + 'i')
+                })
+
+                this.channel.track.on('noteOff', (note) => {
+                    // //console.log('note off!!')
+                    // //console.log(note)
+                    // Converting midi note to pitch.
+                    Tone.Frequency(note.midi, 'midi').toNote()
+                    // this.polySynth.triggerRelease(pitch)
+                })
+
+                this.channel.track.on('updated', this.updateTrack)
+            }
+        },
         updateTrack: function (track) {
 
-            // console.log(track)
+            // //console.log(track)
         }
 
     },
 
-    beforeMount: function () {
-        var self = this
-
+    mounted: function () {
         self.notes = []
 
-        console.log(this.channel)
-        self.polySynth.connect(self.channel.audio)
-
-        this.channel.on('play', function () {
-            // self.part.start()
-        })
-        this.channel.on('pause', function () {
-            // self.part.stop()
-        })
-
-        if (this.channel.track !== undefined) {
-            this.channel.track.on('noteOn', function (note) {
-                // console.log('note on!!!')
-                // console.log(note)
-                // Converting midi note to pitch.
-                var pitch = Tone.Frequency(note.midi, 'midi').toNote()
-                // the notes given as the second element in the array
-                // will be passed in as the second argument
-                self.polySynth.triggerAttackRelease(pitch, note.durationTicks + 'i')
-            })
-
-            this.channel.track.on('noteOff', function (note) {
-                // console.log('note off!!')
-                // console.log(note)
-                // Converting midi note to pitch.
-                Tone.Frequency(note.midi, 'midi').toNote()
-                // self.polySynth.triggerRelease(pitch)
-            })
-
-            this.channel.track.on('updated', self.updateTrack)
-        }
+        this.updateChannel()
     },
 
     data: function () {

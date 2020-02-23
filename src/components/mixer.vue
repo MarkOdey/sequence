@@ -43,7 +43,7 @@ export default {
     },
     watch: {
         channel: function (payload) {
-            console.log(payload)
+            // console.log(payload)
             if (payload !== undefined) {
 
             }
@@ -62,12 +62,12 @@ export default {
         this.channel.on('mute', () => {
             this.muted = true
 
-            console.log('muted changed.')
+            // console.log('muted changed.')
         })
 
         this.channel.on('unmute', () => {
             this.muted = false
-            console.log('unmuted.')
+            // console.log('unmuted.')
         })
 
         setInterval(function () {
