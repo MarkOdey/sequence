@@ -14,12 +14,6 @@ class Channel {
         this.midiIn = {}
         this.midiOut = {}
 
-        this.loop = setInterval(() => {
-            // triggered every eighth note.
-
-            this.tick()
-        }, 200)
-
         // //console.log(payload)
 
         this.audio.toMaster()
@@ -27,12 +21,6 @@ class Channel {
         this.playing = true
 
         this.id = Math.round(Math.random() * 10000)
-
-        // Object.assign(this, payload)
-
-        this.tick = (payload) => {
-            this.emit('tick')
-        }
 
         this.updateTrack = (payload) => {
             // Adding the channel to the payload.
@@ -51,12 +39,22 @@ class Channel {
         this.play = (payload) => {
             // this.loop.start()
             // Tone.Transport.start('+1')
+
+            if (this.track !== undefined) {
+                this.track.play()
+            }
+
             this.playing = true
             this.emit('play', payload)
         }
 
         this.pause = (payload) => {
             // this.loop.stop()
+
+            if (this.track !== undefined) {
+                this.track.pause()
+            }
+
             this.playing = false
             this.emit('pause', payload)
         }

@@ -46,7 +46,6 @@ export default {
         },
         startMarkerDrag: function (event) {
             var x = event.pageX
-            var y = event.pageY
 
             var parent = this.$parent.$refs.noteGrid
 
@@ -56,7 +55,6 @@ export default {
             if (event.touches !== undefined && event.touches.length === 1) {
                 const touch = event.targetTouches.item(0)
                 x = touch.pageX
-                y = touch.pageY
             }
 
             var doc = document.documentElement
@@ -89,9 +87,7 @@ export default {
         endMarkerDrag: function (event) {
             // console.log(event)
 
-            var x = event.pageX
-            var y = event.pageY
-
+            var x = event.pageXS
             var parent = this.$parent.$refs.noteGrid
 
             var bounds = parent.getBoundingClientRect()

@@ -68,7 +68,10 @@ export default {
     },
     beforeMount: function () {
         this.outputs = WebMidi.outputs
-        this.output = this.outputs[0]
+
+        if (this.output[0]) {
+            this.output = this.outputs[0]
+        }
     },
     components: {
         'b-dropdown': BDropdown,

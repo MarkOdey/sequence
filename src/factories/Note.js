@@ -56,6 +56,22 @@ class Note {
             self.selected = false
             self.emit('deselected', self)
         }
+
+        this.schedule = function () {
+            // console.log(this.channel)
+
+            // console.log('scheduling a note')
+            if (payload.ticks !== undefined) {
+                // This is where the note is wrapped around the tonejs transport.
+                this.noteOnTimer = Tone.Transport.schedule(noteOn, this.ticks + 'i')
+            }
+
+            // Once the noteOn fired we register the noteOff sequence.
+            if (payload.durationTicks !== undefined || payload.ticks !== undefined) {
+                this.noteOffTimer = Tone.Transport.schedule(noteOff, this.ticks + this.durationTicks + 'i')
+            }
+        }
+
         this.update = function (payload) {
             // //console.log('updating')
             if (payload.ticks !== undefined) {
@@ -89,19 +105,6 @@ class Note {
 
             if (self.noteOffTimer !== undefined) {
                 Tone.Transport.clear(self.noteOffTimer)
-            }
-
-            // console.log(this.channel)
-
-            // console.log('scheduling a note')
-            if (payload.ticks !== undefined) {
-                // This is where the note is wrapped around the tonejs transport.
-                this.noteOnTimer = Tone.Transport.schedule(noteOn, this.ticks + 'i')
-            }
-
-            // Once the noteOn fired we register the noteOff sequence.
-            if (payload.durationTicks !== undefined || payload.ticks !== undefined) {
-                this.noteOffTimer = Tone.Transport.schedule(noteOff, this.ticks + this.durationTicks + 'i')
             }
 
             // Lets loop through each notes to assign an id to it

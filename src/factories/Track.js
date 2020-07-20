@@ -1,6 +1,8 @@
 // import Tone from 'tone'
 import Note from './Note.js'
-// import Tone from 'tone'
+
+import Tone from 'tone'
+
 var EventEmitter = require('events')
 
 var inherits = require('util').inherits
@@ -15,6 +17,8 @@ class Track {
         this.noteOffEvents = {}
         this.noteUpdatedEvents = {}
 
+        this.interval = '8i'
+
         // Creating an audio node.
 
         this.duration = 0
@@ -24,6 +28,21 @@ class Track {
 
         this.ticks = 0
 
+        this.loop = new Tone.Loop(function () {
+            // triggered every eighth note.
+            console.log('yooo')
+            self.tick()
+        }, this.interval).start(0)
+
+        // this.loop.start(0)
+
+        // Object.assign(this, payload)
+
+        this.tick = (payload) => {
+            console.log('tick triggered')
+            this.emit('tick')
+        }
+
         this.getNotesBetween = function (start, end, keyStart, keyEnd) {
             var notes = []
             // //console.log(start, end)
@@ -32,7 +51,7 @@ class Track {
 
                 // //console.log(keyStart, keyEnd, note.midi)
                 if (start < note.ticks && end > note.ticks &&
-          keyStart < note.midi && keyEnd > note.midi) {
+                    keyStart < note.midi && keyEnd > note.midi) {
                     notes.push(note)
                 }
             }
@@ -145,8 +164,7 @@ class Track {
             }
 
             if (payload.notes !== undefined) {
-
-                console.log('updating notest')
+                console.log('updating notes')
 
                 for (var note of this.notes) {
                     this.removeNote(note)
@@ -162,7 +180,13 @@ class Track {
         }
 
         this.play = function () {
+            console.log('play')
+            this.loop.start()
+        }
 
+        this.pause = function () {
+            console.log('pause')
+            this.loop.stop()
         }
 
         this.remove = function (note) {

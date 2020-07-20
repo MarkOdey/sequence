@@ -2,7 +2,7 @@
 
 <nav class="navbar navbar-expand-lg navbar-light bg-light">
 
-    <midiFile file="beat.mid" @update='updateMidi'></midiFile>
+    <midiFile file="./beethoven_fur_elise.mid" @update='updateMidi'></midiFile>
     <div class="col-2">
       <font-awesome-icon :class="{'d-none':playing}" @click="play()" icon="play" />
       <font-awesome-icon :class="{'d-none':!playing}" @click="pause()" icon="pause" />
