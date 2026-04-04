@@ -8,7 +8,7 @@
 </template>
 
 <script>
-import WebMidi from 'webmidi'
+import { WebMidi } from 'webmidi'
 
 export default {
 
@@ -20,13 +20,12 @@ export default {
         }
     },
     mounted () {
-    // //console.log('compiled')
-
-        // //console.log(WebMidi.inputs)
-
-        this.inputs = WebMidi.inputs
-
-        this.$emit('updated', this.inputs[0])
+        WebMidi.enable().then(() => {
+            this.inputs = WebMidi.inputs
+            this.$emit('updated', this.inputs[0])
+        }).catch(err => {
+            // console.log('WebMidi could not be enabled.', err)
+        })
     }
 
 }

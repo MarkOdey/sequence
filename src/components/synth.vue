@@ -42,7 +42,7 @@
 </template>
 
 <script>
-import Tone from 'tone'
+import * as Tone from 'tone'
 import KnobControl from 'vue-knob-control'
 
 export default {
@@ -51,11 +51,7 @@ export default {
         attack: {
 
             handler: function (val) {
-                // console.log(this.attack + 'changed')
-
-                for (var i in this.polySynth.voices) {
-                    this.polySynth.voices[i].envelope.attack = val
-                }
+                this.polySynth.set({ envelope: { attack: val } })
             }
 
         },
@@ -63,33 +59,21 @@ export default {
         release: {
 
             handler: function (val) {
-                // console.log(this.release + 'changed')
-
-                for (var i in this.polySynth.voices) {
-                    this.polySynth.voices[i].envelope.release = val
-                }
+                this.polySynth.set({ envelope: { release: val } })
             }
 
         },
         sustain: {
 
             handler: function (val) {
-                // console.log(this.sustain + 'changed')
-
-                for (var i in this.polySynth.voices) {
-                    this.polySynth.voices[i].envelope.sustain = val
-                }
+                this.polySynth.set({ envelope: { sustain: val } })
             }
 
         },
         decay: {
 
             handler: function (val) {
-                // console.log(this.decay + 'changed')
-
-                for (var i in this.polySynth.voices) {
-                    this.polySynth.voices[i].envelope.decay = val
-                }
+                this.polySynth.set({ envelope: { decay: val } })
             }
 
         },
@@ -154,9 +138,7 @@ export default {
     },
 
     data: function () {
-        var synth = Tone.Synth
-
-        var polySynth = new Tone.PolySynth(6, synth)
+        var polySynth = new Tone.PolySynth(Tone.Synth)
 
         polySynth.volume.value = -20
 

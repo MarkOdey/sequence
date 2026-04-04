@@ -176,7 +176,7 @@
           <div class="float-right">
 
               <font-awesome-icon class="zoom-in" @click="zoomW(-0.1)" icon="search-minus" />
-              <b-form-input  class="zoom-range" id="controls"  v-model=zoom type="range" min="0" max="1" step="0.001"></b-form-input>
+              <input class="zoom-range form-range" id="controls" v-model="zoom" type="range" min="0" max="1" step="0.001"/>
               <font-awesome-icon  class="zoom-out" @click="zoomW(+0.1)" icon="search-plus" />
 
           </div>
@@ -213,7 +213,7 @@ import selectionBox from './selectionBox.vue'
 
 import trackMarker from './trackMarker.vue'
 
-import Tone from 'tone'
+import * as Tone from 'tone'
 
 // Possibility to use https://github.com/entwicklerstube/babel-plugin-root-import
 // Could be formated at ~/factories/etc...
@@ -239,7 +239,7 @@ for (var i = 0; i < noteRange; i++) {
 export default {
 
     mounted: function () {
-        this.id = this._uid
+        this.id = this.$.uid
 
         this.selectionBox.on('rangeSelected', (event) => {
             // //console.log(event)

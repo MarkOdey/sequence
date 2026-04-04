@@ -18,7 +18,7 @@
 
       </div>
 
-      <div class="slider-value">{{value}}</div>
+      <div class="slider-value">{{modelValue}}</div>
 
   </div>
 </template>
@@ -26,12 +26,12 @@
 <script>
 export default {
     watch: {
-        value: function () {
-            this.internalValue = this.value
+        modelValue: function () {
+            this.internalValue = this.modelValue
         }
     },
     props: {
-        'value': {
+        'modelValue': {
             type: Number,
             required: true
         },
@@ -143,14 +143,14 @@ export default {
 
             this.internalValue = value
 
-            this.$emit('input', this.internalValue)
+            this.$emit('update:modelValue', this.internalValue)
         }
 
     },
     data: function () {
         // console.log(this.value)
         return {
-            internalValue: this.value
+            internalValue: this.modelValue
         }
     }
 

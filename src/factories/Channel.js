@@ -1,4 +1,4 @@
-import Tone from 'tone'
+import * as Tone from 'tone'
 import Track from './Track.js'
 import Project from './Project.js'
 var EventEmitter = require('events')
@@ -16,7 +16,7 @@ class Channel {
 
         // //console.log(payload)
 
-        this.audio.toMaster()
+        this.audio.toDestination()
 
         this.playing = true
 

@@ -32,8 +32,7 @@
 <script>
 import SliderControl from './SliderControl.vue'
 
-import Tone from 'tone'
-import { setInterval } from 'timers'
+import * as Tone from 'tone'
 
 export default {
     name: 'mixer',
@@ -49,7 +48,7 @@ export default {
             }
         },
         volume: function (payload) {
-            this.channel.audio.set('volume', payload)
+            this.channel.audio.set({ volume: payload })
         }
     },
     components: {
@@ -71,7 +70,7 @@ export default {
         })
 
         setInterval(function () {
-            let level = self.meter.getLevel()
+            let level = self.meter.getValue()
 
             // provides the offset between 100db
             self.level = level + 100
@@ -94,7 +93,7 @@ export default {
         }
     },
     data: function () {
-        var meter = new Tone.Meter(0.1)
+        var meter = new Tone.Meter({ smoothing: 0.1 })
 
         return {
             volume: 0,

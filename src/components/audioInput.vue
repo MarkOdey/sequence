@@ -5,19 +5,26 @@
 
         <label for="devices">Audio Device</label>
         <br/>
-        <b-dropdown id="devices" :text="input.label" class="m-2 w-100">
-            <b-dropdown-item  v-for="inputItem in inputs" :key="inputItem.id" @click="selectInput(inputItem)">
+        <div class="dropdown">
+          <button id="devices" class="btn btn-secondary dropdown-toggle m-2 w-100" type="button" data-bs-toggle="dropdown">
+            {{inputLabel}}
+          </button>
+          <ul class="dropdown-menu">
+            <li v-for="inputItem in inputs" :key="inputItem.deviceId">
+              <a class="dropdown-item" href="#" @click.prevent="selectInput(inputItem)">
                 {{inputItem.label}}
-            </b-dropdown-item>
-        </b-dropdown>
+              </a>
+            </li>
+          </ul>
+        </div>
 
-  </div>
     </div>
+  </div>
 </template>
 
 <script>
 
-import Tone from 'tone'
+import * as Tone from 'tone'
 
 export default {
     props: {
@@ -35,8 +42,6 @@ export default {
             let self = this
             // console.log(o)
 
-            // https://stackoverflow.com/questions/58676929/how-to-connect-web-audio-api-to-tone-js
-
             if (self.media === undefined) {
                 self.media = new Tone.UserMedia()
             } else {
@@ -45,10 +50,9 @@ export default {
 
             self.media.open(o.deviceId).then(input => {
                 self.input = input
+                self.inputLabel = o.label
 
                 if (self.channel !== undefined && self.channel.audio !== undefined) {
-                    // console.log(self.channel.audio)
-
                     self.input.connect(self.channel.audio)
                 }
             })
@@ -57,38 +61,14 @@ export default {
     },
     data: function () {
         return {
-
-            input: Object,
+            input: null,
+            inputLabel: 'Select device',
             inputs: []
         }
     },
     mounted: function () {
         navigator.mediaDevices.enumerateDevices().then(payload => {
-            // console.log(payload)
-            // this.input = payload[0]
-
-            self.media = new Tone.UserMedia()
-
-            self.media.open(payload[0]).then(input => {
-                self.input = input
-            })
-
-            this.inputs = payload
-        })
-
-        // console.log(this)
-
-        navigator.getUserMedia({ audio: true }, function (stream) {
-
-            // audio.connect(this.channel.audio)
-
-            // Create an AudioNode from the stream.
-            // var mediaStreamSource = audioContext.createMediaStreamSource(stream)
-
-            // Connect it to the destination to hear yourself (or any other node for processing!)
-            // mediaStreamSource.connect(audioContext.destination)
-        }, function () {
-
+            this.inputs = payload.filter(d => d.kind === 'audioinput')
         })
     }
 

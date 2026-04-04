@@ -23,25 +23,6 @@ import channel from './components/channel.vue'
 export default {
 
     name: 'app',
-    head: {
-    // To use "this" in the component, it is necessary to return the object through a function
-        title: function () {
-            return {
-                inner: 'Title'
-            }
-        },
-        meta: [
-            { name: 'description', content: 'Sequencer app based on Tonejs', id: 'desc' },
-            { name: 'viewport', content: 'width=device-width, user-scalable=no' }
-        ]
-    },
-    css: {
-        loaderOptions: {
-            sass: {
-                data: `@import "@/index.scss";`
-            }
-        }
-    },
     mounted: function () {
         Project.on('updated', (panel) => {
 

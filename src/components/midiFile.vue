@@ -3,7 +3,7 @@
 </template>
 
 <script>
-import Midi from '@tonejs/midi/build/Midi.js'
+import { Midi } from '@tonejs/midi'
 
 export default {
 

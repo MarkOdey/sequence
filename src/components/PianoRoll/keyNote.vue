@@ -8,12 +8,12 @@
         :class="{
           sharp : isSharp(value)
         }"
-    class="keyNote">{{value | toNote}}</div>
+    class="keyNote">{{noteName}}</div>
 </template>
 
 <script>
 
-import Tone from 'tone'
+import * as Tone from 'tone'
 
 export default {
 
@@ -34,10 +34,9 @@ export default {
         }
 
     },
-    filters: {
-        toNote: function (midi) {
-            // //console.log(midi)
-            return Tone.Midi(midi).toNote()
+    computed: {
+        noteName: function () {
+            return Tone.Midi(this.value).toNote()
         }
     }
 

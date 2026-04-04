@@ -14,7 +14,7 @@
     >
       <div class="selectArea" @mousedown="mousedown" @touchstart="touchstart"></div>
 
-      {{data.midi | toNote}}
+      {{noteName}}
       <handle-right :note='data' ref="handleLeft"></handle-right>
       <handle-left :note='data' ref="handleRight" ></handle-left>
 
@@ -23,14 +23,14 @@
 
 <script>
 
-import Tone from 'tone'
+import * as Tone from 'tone'
 import Note from '../../factories/Note.js'
 import handleLeft from './note/handleLeft.vue'
 import handleRight from './note/handleRight.vue'
 
 export default {
     name: 'note',
-    beforeDestroy: function () {
+    beforeUnmount: function () {
         this.data.removeListener('selected', this.onSelected)
         this.data.removeListener('deselected', this.onDeselected)
     },
@@ -87,10 +87,9 @@ export default {
         }
 
     },
-    filters: {
-        toNote: function (midi) {
-            // //console.log(midi)
-            return Tone.Midi(midi).toNote()
+    computed: {
+        noteName: function () {
+            return Tone.Midi(this.data.midi).toNote()
         }
     },
     data: function () {

@@ -2,27 +2,28 @@
 
   <div>
 
-    <b-dropdown :text="output.name">
-
-      <b-dropdown-item  v-for="outputItem in outputs" :key="outputItem.id" @click="selectOutput(outputItem)">
-        {{outputItem.name}}
-      </b-dropdown-item>
-    </b-dropdown>
+    <div class="dropdown">
+      <button class="btn btn-secondary dropdown-toggle" type="button" data-bs-toggle="dropdown">
+        {{output.name}}
+      </button>
+      <ul class="dropdown-menu">
+        <li v-for="outputItem in outputs" :key="outputItem.id">
+          <a class="dropdown-item" href="#" @click.prevent="selectOutput(outputItem)">
+            {{outputItem.name}}
+          </a>
+        </li>
+      </ul>
+    </div>
 
   </div>
 
 </template>
 
 <script>
-import { BDropdown, BDropdownItem } from 'bootstrap-vue'
-import WebMidi from 'webmidi'
+import { WebMidi } from 'webmidi'
 
-WebMidi.enable(function (err) {
-    if (err) {
-        // console.log('WebMidi could not be enabled.', err)
-    } else {
-        // console.log('WebMidi enabled!')
-    }
+WebMidi.enable().catch(err => {
+    // console.log('WebMidi could not be enabled.', err)
 })
 
 export default {
@@ -32,16 +33,12 @@ export default {
     },
     methods: {
         selectOutput: function (p) {
-            // console.log('at selected', p)
             this.output = p
         }
     },
     watch: {
         'channel': function () {
-            // //console.log(WebMidi.outputs)
-
             this.channel.track.on('noteOn', (e) => {
-            // //console.log(WebMidi.outputs)
                 var output = WebMidi.getOutputById(this.output.id)
 
                 output.playNote(e.midi)
@@ -49,8 +46,6 @@ export default {
 
             this.channel.track.on('noteOff', (e) => {
                 var output = WebMidi.getOutputById(this.output.id)
-
-                // console.log('e')
 
                 output.stopNote(e.midi)
             })
@@ -69,13 +64,9 @@ export default {
     beforeMount: function () {
         this.outputs = WebMidi.outputs
 
-        if (this.output[0]) {
+        if (this.outputs[0]) {
             this.output = this.outputs[0]
         }
-    },
-    components: {
-        'b-dropdown': BDropdown,
-        'b-dropdown-item': BDropdownItem
     }
 
 }
