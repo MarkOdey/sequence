@@ -1,20 +1,26 @@
 <template>
-  <div id="app">
+  <div v-if="audioAllowed" id="app" >
 
     <topHeader @updateMidi="updateMidi($event)"></topHeader>
+
 
     <div v-for="channel in channels" :key="channel.id">
       <channel :channel="channel"></channel>
     </div>
 
   </div>
+  <div v-else @click="startAudio">
+    PLEASE ENABLE CONTEXT BY CLICKING HERE
+  </div>
 </template>
 
 <script>
 
-import Project from './factories/Project.js'
-import topHeader from './components/topHeader.vue'
-import channel from './components/channel.vue'
+import * as Tone from 'tone';
+import { nextTick } from 'vue';
+import channel from './components/channel.vue';
+import topHeader from './components/topHeader.vue';
+import Project from './factories/Project.js';
 
 // import Tone from 'tone'
 
@@ -23,31 +29,45 @@ import channel from './components/channel.vue'
 export default {
 
     name: 'app',
-    mounted: function () {
-        Project.on('updated', (panel) => {
+    mounted () {
 
+        Project.on('updated', async () => {
+
+
+
+
+            console.log('project mounted')
+           this.channels = Project.channels
+
+
+
+           await nextTick()
         })
     },
-    watch: {
-        channels () {
-            // console.log(this.channels)
 
-            // console.log('channel changed.')
-        }
-    },
     methods: {
+        startAudio: async function () {
+
+
+            await Tone.start()
+
+            this.audioAllowed= Tone.getContext().state === 'running';
+
+            console.log(Tone.getContext())
+        },
         updateMidi: function (payload) {
-            // console.log(payload)
+             console.log(payload)
         }
     },
     components: {
         topHeader,
         channel
     },
-    data: function () {
+    data:  ()=> {
         return {
-            channels: Project.channels,
-            midi: {}
+            channels: [],
+            midi: {},
+            audioAllowed:false,
         }
     }
 }

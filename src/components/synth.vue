@@ -42,8 +42,9 @@
 </template>
 
 <script>
-import * as Tone from 'tone'
-import KnobControl from 'vue-knob-control'
+import * as Tone from 'tone';
+import { markRaw, toRaw } from 'vue';
+import KnobControl from 'vue-knob-control';
 
 export default {
     watch: {
@@ -89,23 +90,22 @@ export default {
     },
     methods: {
         updateChannel: function () {
-            this.polySynth.connect(this.channel.audio)
+            const channel = toRaw(this.channel)
+            this.polySynth.connect(channel.audio)
 
-            if (this.channel.track !== undefined) {
-                this.updateTrack(this.channel.track)
+            if (channel.track !== undefined) {
+                this.updateTrack(channel.track)
             }
 
-            this.polySynth.connect(this.channel.audio)
-
-            this.channel.on('play', function () {
+            channel.on('play', function () {
                 // this.part.start()
             })
-            this.channel.on('pause', function () {
+            channel.on('pause', function () {
                 // this.part.stop()
             })
 
-            if (this.channel.track !== undefined) {
-                this.channel.track.on('noteOn', (note) => {
+            if (channel.track !== undefined) {
+                channel.track.on('noteOn', (note) => {
                     // Converting midi note to pitch.
                     var pitch = Tone.Frequency(note.midi, 'midi').toNote()
                     // the notes given as the second element in the array
@@ -113,15 +113,15 @@ export default {
                     this.polySynth.triggerAttackRelease(pitch, note.durationTicks + 'i')
                 })
 
-                this.channel.track.on('noteOff', (note) => {
-                    // //console.log('note off!!')
+                channel.track.on('noteOff', (note) => {
+                    console.log('note off!!')
                     // //console.log(note)
                     // Converting midi note to pitch.
                     Tone.Frequency(note.midi, 'midi').toNote()
                     // this.polySynth.triggerRelease(pitch)
                 })
 
-                this.channel.track.on('updated', this.updateTrack)
+                channel.track.on('updated', this.updateTrack)
             }
         },
         updateTrack: function (track) {
@@ -138,7 +138,7 @@ export default {
     },
 
     data: function () {
-        var polySynth = new Tone.PolySynth(Tone.Synth)
+        var polySynth = markRaw(new Tone.PolySynth(Tone.Synth))
 
         polySynth.volume.value = -20
 

@@ -1,14 +1,13 @@
 import * as Tone from 'tone'
 import Track from './Track.js'
 import Project from './Project.js'
-var EventEmitter = require('events')
+import EventEmitter from 'events'
 
 Tone.Transport.bpm.value = 120
 
-var inherits = require('util').inherits
-
-class Channel {
+class Channel extends EventEmitter {
     constructor (payload) {
+        super()
         this.track = {}
         this.audio = new Tone.Channel()
         this.midiIn = {}
@@ -126,8 +125,6 @@ class Channel {
         this.emit('noteOff')
     }
 }
-
-inherits(Channel, EventEmitter)
 
 Channel.Channels = []
 

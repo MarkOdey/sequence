@@ -30,9 +30,10 @@
 </template>
 
 <script>
-import SliderControl from './SliderControl.vue'
+import SliderControl from './SliderControl.vue';
 
-import * as Tone from 'tone'
+import * as Tone from 'tone';
+import { markRaw } from 'vue';
 
 export default {
     name: 'mixer',
@@ -56,7 +57,7 @@ export default {
     },
     beforeMount: function () {
         var self = this
-        this.channel.audio.connect(this.meter)
+      //  this.channel.audio.connect(this.meter)
 
         this.channel.on('mute', () => {
             this.muted = true
@@ -93,12 +94,10 @@ export default {
         }
     },
     data: function () {
-        var meter = new Tone.Meter({ smoothing: 0.1 })
-
         return {
             volume: 0,
             muted: true,
-            meter: meter,
+            meter: markRaw(new Tone.Meter({ smoothing: 0.1 })),
             level: 0,
             recording: false
         }

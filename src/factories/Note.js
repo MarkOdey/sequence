@@ -1,124 +1,130 @@
-import * as Tone from 'tone'
-
-var EventEmitter = require('events')
-
-var inherits = require('util').inherits
+import EventEmitter from "events";
+import * as Tone from "tone";
 /**
  *
  */
-class Note {
-    constructor (payload) {
-        var self = this
-        this.duration = 0
-        this.durationTicks = 0
-        this.noteOffTimer = undefined
-        this.noteOnTimer = undefined
-        this.initialClientX = undefined
-        this.initialClientY = undefined
+class Note extends EventEmitter {
+    constructor(payload) {
+        super();
+        var self = this;
+        this.duration = 0;
+        this.durationTicks = 0;
+        this.noteOffTimer = undefined;
+        this.noteOnTimer = undefined;
+        this.initialClientX = undefined;
+        this.initialClientY = undefined;
 
-        var noteOn = function noteOn () {
-            if (this.channel !== undefined && this.channel.playing === false) {
-                return
+        var noteOn = function noteOn() {
+            console.log("This ever fires?");
+            if (self.channel !== undefined && self.channel.playing === false) {
+                return;
             }
             // console.log('note fired')
-            self.emit('noteOn', self)
-        }
+            self.emit("noteOn", self);
+        };
 
-        var noteOff = function noteOff () {
+        var noteOff = function noteOff() {
             // //console.log('note off')
-            self.emit('noteOff', self)
-        }
+            self.emit("noteOff", self);
+        };
 
         this.setElement = function (element) {
-            this.element = element
-        }
+            this.element = element;
+        };
 
         this.startDrag = function (event) {
-            self.dragging = true
+            self.dragging = true;
 
-            var bounds = this.element.getBoundingClientRect()
+            var bounds = this.element.getBoundingClientRect();
 
-            self.initialClientX = bounds.left
-            self.initialClientY = bounds.top
+            self.initialClientX = bounds.left;
+            self.initialClientY = bounds.top;
 
-            self.emit('startDrag', event)
-        }
+            self.emit("startDrag", event);
+        };
 
         this.select = function () {
             // //console.log('firing select state.')
 
-            self.selected = true
-            self.emit('selected', self)
-        }
+            self.selected = true;
+            self.emit("selected", self);
+        };
 
         this.deselect = function () {
             // //console.log('firing deselect state')
-            self.selected = false
-            self.emit('deselected', self)
-        }
+            self.selected = false;
+            self.emit("deselected", self);
+        };
 
         this.schedule = function () {
             // console.log(this.channel)
 
-            // console.log('scheduling a note')
+            console.log("scheduling a note");
             if (payload.ticks !== undefined) {
                 // This is where the note is wrapped around the tonejs transport.
-                this.noteOnTimer = Tone.Transport.schedule(noteOn, this.ticks + 'i')
+                this.noteOnTimer = Tone.Transport.schedule(
+                    noteOn,
+                    this.ticks + "i",
+                );
             }
 
             // Once the noteOn fired we register the noteOff sequence.
-            if (payload.durationTicks !== undefined || payload.ticks !== undefined) {
-                this.noteOffTimer = Tone.Transport.schedule(noteOff, this.ticks + this.durationTicks + 'i')
+            if (
+                payload.durationTicks !== undefined ||
+                payload.ticks !== undefined
+            ) {
+                this.noteOffTimer = Tone.Transport.schedule(
+                    noteOff,
+                    this.ticks + this.durationTicks + "i",
+                );
             }
-        }
+        };
 
         this.update = function (payload) {
             // //console.log('updating')
             if (payload.ticks !== undefined) {
-                this.ticks = payload.ticks
-                this.time = payload.ticks + 'i'
+                this.ticks = payload.ticks;
+                this.time = payload.ticks + "i";
             }
 
             if (payload.velocity !== undefined) {
-                this.velocity = payload.velocity
+                this.velocity = payload.velocity;
             }
 
             if (payload.duration !== undefined) {
-                this.duration = payload.duration
+                this.duration = payload.duration;
             }
 
             if (payload.durationTicks !== undefined) {
-                this.durationTicks = payload.durationTicks
+                this.durationTicks = payload.durationTicks;
             }
 
             if (payload.midi !== undefined) {
-                this.midi = payload.midi
+                this.midi = payload.midi;
             }
 
             if (payload.channel !== undefined) {
-                this.channel = payload.channel
+                this.channel = payload.channel;
             }
 
             if (self.noteOnTimer !== undefined) {
-                Tone.Transport.clear(self.noteOnTimer)
+                Tone.Transport.clear(self.noteOnTimer);
             }
 
             if (self.noteOffTimer !== undefined) {
-                Tone.Transport.clear(self.noteOffTimer)
+                Tone.Transport.clear(self.noteOffTimer);
             }
 
+            this.schedule();
+
             // Lets loop through each notes to assign an id to it
-            this.emit('updated', this)
-        }
+            this.emit("updated", this);
+        };
 
-        self.update(payload)
+        self.update(payload);
 
-        this.remove = function (note) {
-
-        }
+        this.remove = function (note) {};
     }
 }
 
-inherits(Note, EventEmitter)
-
-export default Note
+export default Note;

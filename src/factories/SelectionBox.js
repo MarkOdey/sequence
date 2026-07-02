@@ -1,12 +1,11 @@
 // import Tone from 'tone'
 // import Note from './Note.js'
 // import Tone from 'tone'
-var EventEmitter = require('events')
+import EventEmitter from 'events'
 
-var inherits = require('util').inherits
-
-class SelectionBox {
+class SelectionBox extends EventEmitter {
     constructor (payload) {
+        super()
         var self = this
 
         if (payload !== undefined && payload.track !== undefined) {
@@ -27,7 +26,5 @@ class SelectionBox {
         }
     }
 }
-
-inherits(SelectionBox, EventEmitter)
 
 export default SelectionBox

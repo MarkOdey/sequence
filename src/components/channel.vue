@@ -17,8 +17,13 @@
   <div class="container-fluid">
     <div class="row flex-row flex-nowrap channel">
 
+        <div class="col">
+
         <midiOut :channel="channel" />
         <midiIn/>
+
+        </div>
+
 
         <pianoRoll :track="channel.track" :channel="channel"></pianoRoll>
 
@@ -36,11 +41,11 @@
 
 <script>
 
-import midiOut from './midiOut.vue'
-import midiIn from './midiIn.vue'
-import pianoRoll from './PianoRoll/pianoRoll.vue'
-import mixer from './mixer.vue'
 import audioInput from './audioInput.vue'
+import midiIn from './midiIn.vue'
+import midiOut from './midiOut.vue'
+import mixer from './mixer.vue'
+import pianoRoll from './PianoRoll/pianoRoll.vue'
 
 // import Channel from '../factories/Channel.js'
 
@@ -62,6 +67,8 @@ export default {
 
     },
     mounted: function () {
+
+        console.log('this should work!!')
         this.channel.on('updated', function (e) {
 
         })

@@ -1,202 +1,216 @@
 // import * as Tone from 'tone'
-import Note from './Note.js'
+import Note from "./Note.js";
 
-import * as Tone from 'tone'
+import * as Tone from "tone";
 
-var EventEmitter = require('events')
+import EventEmitter from "events";
 
-var inherits = require('util').inherits
-
-class Track {
-    constructor (payload) {
-        var self = this
-        this.notes = []
+class Track extends EventEmitter {
+    constructor(payload) {
+        super();
+        var self = this;
+        this.notes = [];
 
         // Warning these elements are keyed by midi X ticks to ensure its unicity.
-        this.noteOnEvents = {}
-        this.noteOffEvents = {}
-        this.noteUpdatedEvents = {}
+        this.noteOnEvents = {};
+        this.noteOffEvents = {};
+        this.noteUpdatedEvents = {};
 
-        this.interval = '8i'
+        this.interval = "8i";
 
         // Creating an audio node.
 
-        this.duration = 0
-        this.durationTicks = 0
+        this.duration = 0;
+        this.durationTicks = 0;
 
-        this.startTick = 0
+        this.startTick = 0;
 
-        this.ticks = 0
+        this.ticks = 0;
 
         this.loop = new Tone.Loop(function () {
             // triggered every eighth note.
-            console.log('yooo')
-            self.tick()
-        }, this.interval).start(0)
-
-        // this.loop.start(0)
+            //  console.log("yooo");
+            self.tick();
+        }, this.interval);
 
         // Object.assign(this, payload)
 
         this.tick = (payload) => {
-            console.log('tick triggered')
-            this.emit('tick')
-        }
+            // console.log("tick triggered");
+            this.emit("tick");
+        };
 
         this.getNotesBetween = function (start, end, keyStart, keyEnd) {
-            var notes = []
+            var notes = [];
             // //console.log(start, end)
             for (var i in this.notes) {
-                var note = this.notes[i]
+                var note = this.notes[i];
 
                 // //console.log(keyStart, keyEnd, note.midi)
-                if (start < note.ticks && end > note.ticks &&
-                    keyStart < note.midi && keyEnd > note.midi) {
-                    notes.push(note)
+                if (
+                    start < note.ticks &&
+                    end > note.ticks &&
+                    keyStart < note.midi &&
+                    keyEnd > note.midi
+                ) {
+                    notes.push(note);
                 }
             }
 
-            return notes
-        }
+            return notes;
+        };
 
         this.addNote = function (payload) {
             // Setting the channel reference to each notes.
             if (this.channel !== undefined) {
-                payload.channel = this.channel
+                payload.channel = this.channel;
             }
-            var note = new Note(payload)
-            this.notes.push(note)
-            this.emit('noteAdded', note)
+            var note = new Note(payload);
+            this.notes.push(note);
+            this.emit("noteAdded", note);
 
             const noteOnEvent = function (note) {
-                self.emit('noteOn', note)
-            }
+                self.emit("noteOn", note);
+            };
 
             const noteOffEvent = function (note) {
-                self.emit('noteOff', note)
-            }
+                self.emit("noteOff", note);
+            };
 
             const noteUpdatedEvent = function (note) {
-                self.emit('noteUpdated', note)
-                self.emit('updated', self)
-            }
+                self.emit("noteUpdated", note);
+                self.emit("updated", self);
+            };
 
-            this.noteOnEvents['m' + note.midi + 't' + note.ticks] = noteOnEvent
-            this.noteOffEvents['m' + note.midi + 't' + note.ticks] = noteOffEvent
-            this.noteUpdatedEvents['m' + note.midi + 't' + note.ticks] = noteUpdatedEvent
-            note.on('updated', noteUpdatedEvent)
+            this.noteOnEvents["m" + note.midi + "t" + note.ticks] = noteOnEvent;
+            this.noteOffEvents["m" + note.midi + "t" + note.ticks] =
+                noteOffEvent;
+            this.noteUpdatedEvents["m" + note.midi + "t" + note.ticks] =
+                noteUpdatedEvent;
+            note.on("updated", noteUpdatedEvent);
 
-            note.on('noteOn', noteOnEvent)
+            note.on("noteOn", noteOnEvent);
 
-            note.on('noteoff', noteOffEvent)
-        }
+            note.on("noteOff", noteOffEvent);
+        };
 
         this.removeNote = function (note) {
-            const i = this.notes.indexOf(note)
-            this.notes.splice(i, 1)
+            const i = this.notes.indexOf(note);
+            this.notes.splice(i, 1);
 
-            this.emit('noteAdded', note)
+            this.emit("noteRemoved", note);
 
-            note.removeListener('updated', this.noteUpdatedEvents['m' + note.midi + 't' + note.ticks])
+            note.removeListener(
+                "updated",
+                this.noteUpdatedEvents["m" + note.midi + "t" + note.ticks],
+            );
 
-            note.removeListener('noteOn', this.noteOnEvents['m' + note.midi + 't' + note.ticks])
+            note.removeListener(
+                "noteOn",
+                this.noteOnEvents["m" + note.midi + "t" + note.ticks],
+            );
 
-            note.removeListener('noteoff', this.noteOffEvents['m' + note.midi + 't' + note.ticks])
-        }
+            note.removeListener(
+                "noteOff",
+                this.noteOffEvents["m" + note.midi + "t" + note.ticks],
+            );
+        };
 
         /**
-     * Deselect all
-     */
+         * Deselect all
+         */
         this.deselectAll = function (excludes) {
             for (var i in self.notes) {
-                if (excludes !== undefined && excludes.indexOf(self.notes[i]) !== -1) {
-                    continue
+                if (
+                    excludes !== undefined &&
+                    excludes.indexOf(self.notes[i]) !== -1
+                ) {
+                    continue;
                 }
 
-                self.notes[i].deselect()
+                self.notes[i].deselect();
             }
-        }
+        };
 
         this.getSelected = function () {
-            var notes = []
+            var notes = [];
             for (var i in self.notes) {
-                var note = self.notes[i]
+                var note = self.notes[i];
                 if (note.selected === true) {
-                    notes.push(note)
+                    notes.push(note);
                 }
             }
 
-            return notes
-        }
+            return notes;
+        };
 
         this.hasSelected = function () {
-            var selected = this.getSelected()
+            var selected = this.getSelected();
             if (selected.length === 0) {
-                return false
+                return false;
             } else {
-                return true
+                return true;
             }
-        }
+        };
 
         this.update = function (payload) {
             if (payload.channel !== undefined) {
-                this.channel = payload.channel
+                this.channel = payload.channel;
             }
             if (payload.duration !== undefined) {
-                this.duration = payload.duration
+                this.duration = payload.duration;
             }
 
             if (payload.durationTicks !== undefined) {
-                this.durationTicks = payload.durationTicks
+                this.durationTicks = payload.durationTicks;
             }
 
             if (payload.endTick !== undefined) {
-                this.endTick = payload.endTick
+                this.endTick = payload.endTick;
             }
 
             if (payload.startTick !== undefined) {
-                this.startTick = payload.startTick
+                this.startTick = payload.startTick;
             }
 
             // If endTick is not defined in payload use durationTicks as the endTicks
-            if (this.endTick === undefined && payload.durationTicks !== undefined) {
-                this.endTick = this.durationTicks
+            if (
+                this.endTick === undefined &&
+                payload.durationTicks !== undefined
+            ) {
+                this.endTick = this.durationTicks;
             }
 
             if (payload.notes !== undefined) {
-                console.log('updating notes')
+                //console.log('updating notes')
 
                 for (var note of this.notes) {
-                    this.removeNote(note)
+                    this.removeNote(note);
                 }
 
                 // Lets loop through each notes to assign an id to it
                 for (var i in payload.notes) {
-                    this.addNote(payload.notes[i])
+                    this.addNote(payload.notes[i]);
                 }
             }
 
-            this.emit('updated', this)
-        }
+            this.emit("updated", this);
+        };
 
         this.play = function () {
-            console.log('play')
-            this.loop.start()
-        }
+            console.log("play");
+            this.loop.start();
+        };
 
         this.pause = function () {
-            console.log('pause')
-            this.loop.stop()
-        }
+            console.log("pause");
+            this.loop.stop();
+        };
 
-        this.remove = function (note) {
+        this.remove = function (note) {};
 
-        }
-
-        this.update(payload)
+        this.update(payload);
     }
 }
 
-inherits(Track, EventEmitter)
-
-export default Track
+export default Track;
